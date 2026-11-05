@@ -1,0 +1,95 @@
+# ==============================================================================
+# SproutMemo (知拾) .gitignore
+# ==============================================================================
+
+# ── 1. 敏感配置文件与个人凭证 ──────────────────────────────────────
+.env
+**/.env
+.env.local
+.env.*.local
+!*.example
+
+# 个人服务器配置与内网运维信息
+docs/server_info.md
+scripts/deploy_to_server.py
+scripts/publish_and_deploy_all.py
+sproutmemo-api/deploy.py
+
+# ── 2. AI 编程过程性文件与规范配置 ──────────────────────────────────
+.agents/
+.agent/
+openspec/
+scratch/
+install-skills.ps1
+install_mattskills.bat
+
+# ── 3. 历史备份与废弃目录 ──────────────────────────────────────────
+Old/
+sproutmemo-desktop-backup/
+*.bak
+*.backup
+
+# ── 4. 运行期持久化数据与日志 ──────────────────────────────────────
+data/
+pgdata/
+**/data/*
+!**/data/.gitkeep
+**/pgdata/*
+**/logs/*
+*.log
+
+# ── 5. 二进制安装包与发布产物 ──────────────────────────────────────
+*.apk
+*.aab
+releases/
+SproutMemo-release.apk
+
+# ── 6. Python 开发与测试缓存 ───────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+ENV/
+.pytest_cache/
+.coverage
+htmlcov/
+dist-py/
+
+# ── 7. Node / 前端开发与构建 ───────────────────────────────────────
+node_modules/
+dist/
+dist-ssr/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# ── 8. Android 客户端构建与私钥 ────────────────────────────────────
+.gradle/
+build/
+**/build/
+local.properties
+captures/
+.externalNativeBuild/
+.cxx/
+*.jks
+*.keystore
+*.hprof
+
+# ── 9. IDE 与系统文件 ─────────────────────────────────────────────
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
