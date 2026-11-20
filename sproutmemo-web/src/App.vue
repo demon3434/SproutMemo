@@ -1,7 +1,8 @@
 <template>
-  <div v-if="loading" class="auth-container" style="display: flex; align-items: center; justify-content: center; min-height: 100vh;">
-    <div style="text-align: center; color: var(--text-muted);">
-      <h3>正在加载系统资源...</h3>
+  <div v-if="loading" class="auth-container">
+    <div class="loading-paper">
+      <AppIcon name="sprout" :size="28" />
+      <span>正在翻开错题本...</span>
     </div>
   </div>
 
@@ -9,79 +10,105 @@
     <router-view />
   </div>
 
-  <div v-else class="app-layout" :style="{ '--sidebar-width': isSidebarCollapsed ? '76px' : '195px' }">
-    <!-- Sidebar -->
-    <aside class="sidebar" :class="{ collapsed: isSidebarCollapsed }" :style="{ width: isSidebarCollapsed ? '76px' : '195px', transition: 'var(--transition)' }">
-      <div class="sidebar-brand" style="display: flex; align-items: center; gap: 10px; justify-content: var(--brand-justify, flex-start);">
-        <img src="/icon.png" :style="{ width: isSidebarCollapsed ? '36px' : '72px', height: isSidebarCollapsed ? '36px' : '72px', borderRadius: isSidebarCollapsed ? '8px' : '12px', transition: 'var(--transition)' }" />
-        <span v-if="!isSidebarCollapsed" style="font-size: 22px; font-weight: 700; color: var(--text-muted); letter-spacing: 1px; margin-left: 2px;">知拾</span>
+  <div v-else class="app-layout" :style="{ '--sidebar-width': isSidebarCollapsed ? '72px' : '196px' }">
+    <!-- 左侧手账索引栏（唯一主导航，无顶部冗余栏） -->
+    <aside class="sidebar" :class="{ collapsed: isSidebarCollapsed }">
+      <div class="sidebar-brand" :style="{ justifyContent: brandJustify }">
+        <img
+          src="/icon.png"
+          alt="知拾"
+          class="brand-logo"
+          :class="{ collapsed: isSidebarCollapsed }"
+        />
+        <span v-if="!isSidebarCollapsed">知拾</span>
       </div>
-      
-      <!-- 菜单容器 (支持长菜单独立滚动，防推走底部按钮) -->
-      <div class="sidebar-menu-wrapper" style="flex: 1; overflow-y: auto; overflow-x: hidden; margin-bottom: 12px; display: flex; flex-direction: column;">
-        
+
+      <!-- 家长专属：切换孩子胶囊（放在侧边栏顶部，不占用右侧错题展示空间） -->
+      <div
+        v-if="!isSidebarCollapsed && currentUser.role === 'PARENT' && currentUser.bound_students && currentUser.bound_students.length > 0"
+        class="sidebar-child-box"
+      >
+        <label class="sidebar-child-label">当前查看孩子</label>
+        <StationerySelect
+          v-model="activeChildId"
+          :options="currentUser.bound_students.map(c => ({ value: c.id, label: c.nickname || c.username }))"
+          compact
+        />
+      </div>
+
+      <!-- 菜单容器 -->
+      <div class="sidebar-menu-wrapper">
         <!-- ADMIN Menus -->
         <div v-if="currentUser.role === 'ADMIN'">
           <div class="menu-category-title" v-if="!isSidebarCollapsed">系统配置</div>
           <ul class="sidebar-submenu">
-            <router-link to="/users" custom v-slot="{ href, navigate, isActive }">
+            <router-link to="/users" custom v-slot="{ navigate, isActive }">
               <li class="sidebar-subitem" :class="{ active: isActive }" @click="navigate">
-                <span class="menu-icon">👥</span> <span v-if="!isSidebarCollapsed">用户管理</span>
+                <span class="menu-icon"><AppIcon name="users" :size="18" /></span>
+                <span v-if="!isSidebarCollapsed">用户管理</span>
               </li>
             </router-link>
-            <router-link to="/presets/subjects" custom v-slot="{ href, navigate, isActive }">
+            <router-link to="/presets/subjects" custom v-slot="{ navigate, isActive }">
               <li class="sidebar-subitem" :class="{ active: isActive }" @click="navigate">
-                <span class="menu-icon">🏷️</span> <span v-if="!isSidebarCollapsed">学科管理</span>
+                <span class="menu-icon"><AppIcon name="tag" :size="18" /></span>
+                <span v-if="!isSidebarCollapsed">学科管理</span>
               </li>
             </router-link>
-            <router-link to="/presets/semesters" custom v-slot="{ href, navigate, isActive }">
+            <router-link to="/presets/semesters" custom v-slot="{ navigate, isActive }">
               <li class="sidebar-subitem" :class="{ active: isActive }" @click="navigate">
-                <span class="menu-icon">📅</span> <span v-if="!isSidebarCollapsed">学期管理</span>
+                <span class="menu-icon"><AppIcon name="calendar" :size="18" /></span>
+                <span v-if="!isSidebarCollapsed">学期管理</span>
               </li>
             </router-link>
-            <router-link to="/presets/semester-subject" custom v-slot="{ href, navigate, isActive }">
+            <router-link to="/presets/semester-subject" custom v-slot="{ navigate, isActive }">
               <li class="sidebar-subitem" :class="{ active: isActive }" @click="navigate">
-                <span class="menu-icon">⛓️</span> <span v-if="!isSidebarCollapsed">“学期-学科”关联</span>
+                <span class="menu-icon"><AppIcon name="link" :size="18" /></span>
+                <span v-if="!isSidebarCollapsed">“学期-学科”关联</span>
               </li>
             </router-link>
           </ul>
-          
+
           <div class="menu-category-title" v-if="!isSidebarCollapsed">系统管理</div>
           <ul class="sidebar-submenu">
-            <router-link to="/backup" custom v-slot="{ href, navigate, isActive }">
+            <router-link to="/backup" custom v-slot="{ navigate, isActive }">
               <li class="sidebar-subitem" :class="{ active: isActive }" @click="navigate">
-                <span class="menu-icon">💾</span> <span v-if="!isSidebarCollapsed">系统备份</span>
+                <span class="menu-icon"><AppIcon name="database" :size="18" /></span>
+                <span v-if="!isSidebarCollapsed">系统备份</span>
               </li>
             </router-link>
           </ul>
         </div>
-        
+
         <!-- PARENT Menus -->
         <div v-else-if="currentUser.role === 'PARENT'">
           <div class="menu-category-title" v-if="!isSidebarCollapsed">孩子管理</div>
           <ul class="sidebar-submenu">
-            <router-link to="/parent/children" custom v-slot="{ href, navigate, isActive }">
+            <router-link to="/parent/children" custom v-slot="{ navigate, isActive }">
               <li class="sidebar-subitem" :class="{ active: isActive }" @click="navigate">
-                <span class="menu-icon">👶</span> <span v-if="!isSidebarCollapsed">我的孩子</span>
+                <span class="menu-icon"><AppIcon name="child" :size="18" /></span>
+                <span v-if="!isSidebarCollapsed">我的孩子</span>
               </li>
             </router-link>
-            <router-link to="/parent/books" custom v-slot="{ href, navigate, isActive }">
+            <router-link to="/parent/books" custom v-slot="{ navigate, isActive }">
               <li class="sidebar-subitem" :class="{ active: isActive }" @click="navigate">
-                <span class="menu-icon">📖</span> <span v-if="!isSidebarCollapsed">习题册管理</span>
+                <span class="menu-icon"><AppIcon name="book" :size="18" /></span>
+                <span v-if="!isSidebarCollapsed">习题册管理</span>
               </li>
             </router-link>
           </ul>
 
           <div class="menu-category-title" v-if="!isSidebarCollapsed">学习情况</div>
           <ul class="sidebar-submenu">
-            <router-link to="/notes/list" custom v-slot="{ href, navigate, isActive }">
+            <router-link to="/notes/list" custom v-slot="{ navigate, isActive }">
               <li class="sidebar-subitem" :class="{ active: isActive }" @click="navigate">
-                <span class="menu-icon">📋</span> <span v-if="!isSidebarCollapsed">查看习题</span>
+                <span class="menu-icon"><AppIcon name="list" :size="18" /></span>
+                <span v-if="!isSidebarCollapsed">查看习题</span>
               </li>
             </router-link>
-            <router-link to="/notes/review" custom v-slot="{ href, navigate, isActive }">
+            <router-link to="/notes/review" custom v-slot="{ navigate, isActive }">
               <li class="sidebar-subitem" :class="{ active: isActive }" @click="navigate">
-                <span class="menu-icon">🎯</span> <span v-if="!isSidebarCollapsed">查看复习</span>
+                <span class="menu-icon"><AppIcon name="target" :size="18" /></span>
+                <span v-if="!isSidebarCollapsed">查看复习</span>
               </li>
             </router-link>
           </ul>
@@ -89,86 +116,86 @@
 
         <!-- STUDENT Menus -->
         <div v-else-if="currentUser.role === 'STUDENT'">
-          <div class="menu-category-title" v-if="!isSidebarCollapsed">习题笔记</div>
+          <div class="menu-category-title" v-if="!isSidebarCollapsed">我的错题本</div>
           <ul class="sidebar-submenu">
-            <router-link to="/notes/create" custom v-slot="{ href, navigate, isActive }">
+            <router-link to="/notes/create" custom v-slot="{ navigate, isActive }">
               <li class="sidebar-subitem" :class="{ active: isActive }" @click="navigate">
-                <span class="menu-icon">✍️</span> <span v-if="!isSidebarCollapsed">录入习题</span>
+                <span class="menu-icon"><AppIcon name="pen" :size="18" /></span>
+                <span v-if="!isSidebarCollapsed">录入习题</span>
               </li>
             </router-link>
-            <router-link to="/notes/list" custom v-slot="{ href, navigate, isActive }">
+            <router-link to="/notes/list" custom v-slot="{ navigate, isActive }">
               <li class="sidebar-subitem" :class="{ active: isActive }" @click="navigate">
-                <span class="menu-icon">📋</span> <span v-if="!isSidebarCollapsed">查看习题</span>
+                <span class="menu-icon"><AppIcon name="list" :size="18" /></span>
+                <span v-if="!isSidebarCollapsed">查看习题</span>
               </li>
             </router-link>
-            <router-link to="/notes/review" custom v-slot="{ href, navigate, isActive }">
+            <router-link to="/notes/review" custom v-slot="{ navigate, isActive }">
               <li class="sidebar-subitem" :class="{ active: isActive }" @click="navigate">
-                <span class="menu-icon">🎯</span> <span v-if="!isSidebarCollapsed">我要复习</span>
+                <span class="menu-icon"><AppIcon name="target" :size="18" /></span>
+                <span v-if="!isSidebarCollapsed">我要复习</span>
               </li>
             </router-link>
           </ul>
 
           <div class="menu-category-title" v-if="!isSidebarCollapsed">习题册配置</div>
           <ul class="sidebar-submenu">
-            <router-link to="/student/books" custom v-slot="{ href, navigate, isActive }">
+            <router-link to="/student/books" custom v-slot="{ navigate, isActive }">
               <li class="sidebar-subitem" :class="{ active: isActive }" @click="navigate">
-                <span class="menu-icon">📖</span> <span v-if="!isSidebarCollapsed">我的习题册</span>
+                <span class="menu-icon"><AppIcon name="book" :size="18" /></span>
+                <span v-if="!isSidebarCollapsed">我的习题册</span>
               </li>
             </router-link>
           </ul>
         </div>
       </div>
 
-      <!-- 底部收缩栏 (固定在左下角，不随内容滚动) -->
-      <div class="sidebar-footer" style="padding-top: 12px; border-top: 1px solid var(--border); display: flex; justify-content: center; width: 100%; flex-shrink: 0;">
-        <button 
-          @click="isSidebarCollapsed = !isSidebarCollapsed" 
-          class="collapse-toggle-btn" 
+      <!-- 底部小主人名片 + 折叠按钮 -->
+      <div class="sidebar-footer">
+        <div class="sidebar-user-wrap" @click.stop="toggleDropdown">
+          <button type="button" class="user-trigger" :class="{ compact: isSidebarCollapsed }" :title="currentUser.nickname || currentUser.username">
+            <span class="user-avatar-chip">{{ userInitial }}</span>
+            <span class="user-meta" v-if="!isSidebarCollapsed">
+              <span class="user-name">{{ currentUser.nickname || currentUser.username }}</span>
+              <span class="user-role">{{ roleLabel }}</span>
+            </span>
+          </button>
+
+          <div class="dropdown-popup upward" v-if="showUserDropdown">
+            <div class="dropdown-popup-item" @click="goToProfile">
+              <AppIcon name="user" :size="16" />
+              <span>个人设置</span>
+            </div>
+            <div class="dropdown-popup-item" @click="goToPassword">
+              <AppIcon name="key" :size="16" />
+              <span>修改密码</span>
+            </div>
+            <div class="dropdown-popup-item" @click="goToSystemSettings">
+              <AppIcon name="palette" :size="16" />
+              <span>系统设置</span>
+            </div>
+            <div class="dropdown-popup-divider"></div>
+            <div class="dropdown-popup-item logout" @click="logout">
+              <AppIcon name="logout" :size="16" />
+              <span>退出登录</span>
+            </div>
+          </div>
+        </div>
+
+        <button
+          @click="isSidebarCollapsed = !isSidebarCollapsed"
+          class="collapse-toggle-btn"
           :title="isSidebarCollapsed ? '展开菜单' : '收缩菜单'"
+          :aria-label="isSidebarCollapsed ? '展开菜单' : '收缩菜单'"
         >
-          <span>{{ isSidebarCollapsed ? '»' : '«' }}</span>
+          <AppIcon :name="isSidebarCollapsed ? 'chevron-right' : 'chevron-left'" :size="16" />
         </button>
       </div>
     </aside>
 
-    <!-- Main Content Panel -->
-    <main class="main-content">
-      <header class="header">
-        <div class="header-title" style="font-weight: 700; font-size: 20px;">
-          {{ viewTitle }}
-        </div>
-        <div class="header-user" style="display: flex; align-items: center; position: relative;" @click.stop="toggleDropdown">
-          <!-- Children Selector for Parents -->
-          <div v-if="currentUser.role === 'PARENT' && currentUser.bound_students && currentUser.bound_students.length > 0" style="margin-right: 15px;" @click.stop>
-            <select id="child-selector" class="form-control" v-model="activeChildId" style="width: auto; padding: 6px 12px; margin-bottom: 0; display: inline-block;">
-              <option v-for="child in currentUser.bound_students" :key="child.id" :value="child.id">
-                学生: {{ child.nickname || child.username }}
-              </option>
-            </select>
-          </div>
-          <!-- 用户信息两行垂直排布 -->
-          <div style="display: flex; flex-direction: column; align-items: flex-end; margin-right: 8px; user-select: none;">
-            <span style="font-weight: 700; font-size: 14.5px; color: var(--text-main); line-height: 1.2;">
-              {{ currentUser.nickname || currentUser.username }}
-            </span>
-            <span style="font-size: 10px; color: var(--text-muted); font-weight: 700; margin-top: 2px; letter-spacing: 0.5px;">
-              {{ currentUser.role }}
-            </span>
-          </div>
-          <span style="font-size: 10px; color: var(--text-secondary); cursor: pointer;">▼</span>
-
-          <!--右上角下拉设置菜单-->
-          <div class="dropdown-popup" v-if="showUserDropdown">
-            <div class="dropdown-popup-item" @click="goToProfile">👤 个人设置</div>
-            <div class="dropdown-popup-item" @click="goToPassword">🔐 修改密码</div>
-            <div class="dropdown-popup-item" @click="goToSystemSettings">⚙️ 系统设置</div>
-            <div class="dropdown-popup-divider"></div>
-            <div class="dropdown-popup-item logout" @click="logout">🚪 退出登录</div>
-          </div>
-        </div>
-      </header>
-
-      <div class="content-body" style="padding: 32px;">
+    <!-- 右侧方格手账主工作区（全宽通顶，最大化错题展示空间） -->
+    <main class="main-content grid-paper">
+      <div class="content-body">
         <router-view />
       </div>
     </main>
@@ -180,6 +207,8 @@ import { ref, computed, provide, onMounted, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { api, tokens } from './services/api.js';
 import { applyTheme } from './utils/theme.js';
+import AppIcon from './components/AppIcon.vue';
+import StationerySelect from './components/StationerySelect.vue';
 
 const router = useRouter();
 const route = useRoute();
@@ -190,7 +219,6 @@ const activeChildId = ref('');
 const isSidebarCollapsed = ref(false);
 const showUserDropdown = ref(false);
 
-// Preload settings state shared globally
 const semestersList = ref([]);
 const subjectsList = ref([]);
 
@@ -201,50 +229,39 @@ provide('semestersList', semestersList);
 provide('subjectsList', subjectsList);
 provide('refreshAuth', checkAuth);
 
-function toggleDropdown(e) {
+const userInitial = computed(() => {
+  const name = currentUser.value?.nickname || currentUser.value?.username || '知';
+  return name.slice(0, 1).toUpperCase();
+});
+
+const roleLabel = computed(() => {
+  const map = { ADMIN: '管理员', PARENT: '家长', STUDENT: '小主人' };
+  return map[currentUser.value?.role] || currentUser.value?.role || '';
+});
+
+function toggleDropdown() {
   showUserDropdown.value = !showUserDropdown.value;
 }
 
 function goToProfile() {
+  showUserDropdown.value = false;
   router.push('/settings/profile');
 }
 
 function goToPassword() {
+  showUserDropdown.value = false;
   router.push('/settings/password');
 }
 
 function goToSystemSettings() {
+  showUserDropdown.value = false;
   router.push('/settings');
 }
 
-// Computed viewTitle
-const viewTitle = computed(() => {
-  const titles = {
-    'dashboard': '错题总览',
-    'presets-semesters': '学期管理',
-    'presets-subjects': '基础学科管理',
-    'presets-semester-subject': '"学期-学科" 关联',
-    'parent-children': '我的孩子管理',
-    'parent-books': '习题册管理',
-    'student-books': '我的习题册',
-    'notes-create': '录入习题',
-    'notes-list': '查看习题',
-    'notes-review': '我要复习',
-    'settings-profile': '个人设置',
-    'settings-password': '修改密码',
-    'users': '用户账号管理',
-    'backup': '系统数据备份与恢复',
-    'settings': '系统设置'
-  };
-  return titles[route.name] || '系统管理';
-});
-
-// Brand justify computed
 const brandJustify = computed(() => {
   return isSidebarCollapsed.value ? 'center' : 'flex-start';
 });
 
-// Watch token status
 async function checkAuth() {
   if (!tokens.getAccess()) {
     currentUser.value = null;
@@ -285,9 +302,7 @@ async function checkAuth() {
   }
 }
 
-// Watch child selection updates
 watch(activeChildId, (newId) => {
-  // Broadcaster for views that listen to child selector changes
   window.dispatchEvent(new CustomEvent('child-changed', { detail: newId }));
 });
 
@@ -297,6 +312,7 @@ function applySavedTheme() {
 }
 
 function logout() {
+  showUserDropdown.value = false;
   tokens.clear();
   currentUser.value = null;
   router.push('/login');
@@ -305,8 +321,7 @@ function logout() {
 onMounted(() => {
   applySavedTheme();
   checkAuth();
-  
-  // Custom theme listener
+
   window.addEventListener('theme-updated', () => {
     applySavedTheme();
   });
@@ -318,48 +333,4 @@ onMounted(() => {
 });
 </script>
 
-<style scoped>
-.dropdown-popup {
-  position: absolute;
-  top: 100%;
-  right: 0;
-  margin-top: 8px;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
-  min-width: 160px;
-  z-index: 100;
-  display: flex;
-  flex-direction: column;
-  padding: 6px 0;
-}
-
-.dropdown-popup-item {
-  padding: 10px 16px;
-  font-size: 13.5px;
-  font-weight: 600;
-  color: var(--text-secondary);
-  cursor: pointer;
-  transition: var(--transition);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.dropdown-popup-item:hover {
-  background: var(--primary-light);
-  color: var(--primary);
-}
-
-.dropdown-popup-item.logout:hover {
-  background: #fee2e2;
-  color: #ef4444;
-}
-
-.dropdown-popup-divider {
-  height: 1px;
-  background: var(--border);
-  margin: 6px 0;
-}
-</style>
+<style scoped src="./AppLayout.css"></style>

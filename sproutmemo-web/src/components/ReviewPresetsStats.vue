@@ -1,6 +1,9 @@
 <template>
   <div class="empty-start-state-stats">
-    <div class="stats-overview-header-title">📊 习题库总览</div>
+    <div class="stats-overview-header-title">
+      <AppIcon name="chart" :size="18" />
+      <span>习题库总览</span>
+    </div>
     
     <div class="stats-overview-grid">
       <!-- 左侧：汇总卡片与掌握度 -->
@@ -24,7 +27,10 @@
 
       <!-- 中间：掌握度比例 -->
       <div class="stats-card funnel-card">
-        <h3 class="card-title-small">🎯 掌握程度占比</h3>
+        <h3 class="card-title-small">
+          <AppIcon name="target" :size="16" />
+          <span>掌握程度占比</span>
+        </h3>
         <div class="funnel-viz-row">
           <div class="funnel-ring clueless">
             <div class="ring-bar red" :style="{ '--pct': getMasteryPct('CLUELESS') }"></div>
@@ -46,7 +52,10 @@
 
       <!-- 右侧：学科分布直方图 -->
       <div class="stats-card subject-dist-card">
-        <h3 class="card-title-small">📚 习题学科分布</h3>
+        <h3 class="card-title-small">
+          <AppIcon name="book" :size="16" />
+          <span>习题学科分布</span>
+        </h3>
         <div v-if="!stats?.subject_distribution || stats.subject_distribution.length === 0" class="sub-empty-tip">
           暂无各学科分布数据
         </div>
@@ -72,6 +81,8 @@
 </template>
 
 <script setup>
+import AppIcon from './AppIcon.vue';
+
 const props = defineProps({
   stats: Object
 });
@@ -106,12 +117,12 @@ function getSubjectBarWidth(count) {
   display: flex;
   flex-direction: column;
   width: 100%;
-  max-width: 1000px;
+  max-width: 1120px;
   margin: 10px auto;
   background: var(--bg-card);
-  border: 1px solid var(--border);
+  border: 2px solid var(--border);
   border-radius: var(--radius-md);
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 4px 0 0 var(--color-edge), var(--shadow-sm);
   animation: viewFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -141,9 +152,10 @@ function getSubjectBarWidth(count) {
 }
 
 .stats-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
+  background: var(--bg-main);
+  border: 2px solid var(--border);
   border-radius: var(--radius-md);
+  box-shadow: 0 3px 0 0 var(--color-edge);
   padding: 20px;
   display: flex;
   flex-direction: column;

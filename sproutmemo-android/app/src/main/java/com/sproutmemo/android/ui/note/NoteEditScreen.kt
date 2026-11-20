@@ -75,8 +75,8 @@ fun NoteEditScreen(
     if (showSaveConfirmDialog) {
         Dialog(onDismissRequest = { showSaveConfirmDialog = false }) {
             Card(
-                colors = CardDefaults.cardColors(containerColor = colors.darkBg),
-                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(containerColor = colors.cardBg),
+                shape = RoundedCornerShape(16.dp),
                 modifier = Modifier.padding(16.dp)
             ) {
                 Column(
@@ -127,8 +127,8 @@ fun NoteEditScreen(
     if (showExitConfirmDialog) {
         Dialog(onDismissRequest = { showExitConfirmDialog = false }) {
             Card(
-                colors = CardDefaults.cardColors(containerColor = colors.darkBg),
-                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(containerColor = colors.cardBg),
+                shape = RoundedCornerShape(16.dp),
                 modifier = Modifier.padding(16.dp)
             ) {
                 Column(

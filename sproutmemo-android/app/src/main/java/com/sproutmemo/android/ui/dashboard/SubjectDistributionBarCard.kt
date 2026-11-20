@@ -16,6 +16,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sproutmemo.android.data.remote.model.StatsOverviewDto
+import com.sproutmemo.android.ui.components.StationeryCard
+import com.sproutmemo.android.ui.components.StationeryIcon
 import com.sproutmemo.android.ui.theme.LocalAppColors
 
 @Composable
@@ -24,27 +26,30 @@ fun SubjectDistributionBarCard(stats: StatsOverviewDto?) {
     val items = stats?.subject_distribution ?: emptyList()
     val maxCount = items.maxOfOrNull { it.count }?.coerceAtLeast(1) ?: 1
 
-    Card(
+    StationeryCard(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 6.dp),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = colors.cardBg),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            .padding(vertical = 6.dp)
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
-            Text(
-                text = "📚 习题学科分布",
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold,
-                color = colors.textPrimary,
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.padding(bottom = 12.dp)
-            )
+            ) {
+                StationeryIcon(name = "book", size = 18.dp, tint = colors.neonBlue)
+                Text(
+                    text = "习题学科分布",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = colors.textPrimary
+                )
+            }
 
             if (items.isEmpty()) {
                 Text(
                     text = "暂无各学科分布数据",
-                    fontSize = 12.sp,
+                    fontSize = 13.5.sp,
                     color = colors.textSecondary,
                     modifier = Modifier
                         .fillMaxWidth()
@@ -59,7 +64,7 @@ fun SubjectDistributionBarCard(stats: StatsOverviewDto?) {
                         ) {
                             Text(
                                 text = item.subject_name,
-                                fontSize = 12.sp,
+                                fontSize = 13.5.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = colors.textPrimary,
                                 maxLines = 1,
@@ -86,7 +91,7 @@ fun SubjectDistributionBarCard(stats: StatsOverviewDto?) {
 
                             Text(
                                 text = "${item.count} 题",
-                                fontSize = 12.sp,
+                                fontSize = 13.5.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = colors.textSecondary,
                                 modifier = Modifier.width(44.dp).padding(start = 8.dp)

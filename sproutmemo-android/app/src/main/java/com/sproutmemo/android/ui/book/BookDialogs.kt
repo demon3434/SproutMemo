@@ -22,6 +22,8 @@ fun BookDeleteDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
+        containerColor = colors.cardBg,
+        shape = RoundedCornerShape(18.dp),
         confirmButton = {
             Button(
                 onClick = onConfirm,
@@ -56,6 +58,8 @@ fun BookRenameDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
+        containerColor = colors.cardBg,
+        shape = RoundedCornerShape(18.dp),
         confirmButton = {
             Button(
                 onClick = onConfirm,

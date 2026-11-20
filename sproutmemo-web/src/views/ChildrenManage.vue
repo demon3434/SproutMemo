@@ -3,7 +3,7 @@
 
     <!-- Children List -->
     <div v-if="children.length === 0 && !loading" style="background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 48px; text-align: center; color: var(--text-muted);">
-      <div style="font-size: 36px; margin-bottom: 12px;">👶</div>
+      <div style="font-size: 36px; margin-bottom: 12px; color: var(--primary);"></div>
       <p>您的账号下暂未关联任何孩子账号。<br>请联系管理员绑定孩子账号。</p>
     </div>
 
@@ -48,7 +48,7 @@
             >重置</button>
           </div>
           <div class="current-sem-tip">
-            <span>📅 当前推算学期：</span>
+            <span>当前推算学期：</span>
             <strong>{{ computedSemester(child) }}</strong>
           </div>
         </div>

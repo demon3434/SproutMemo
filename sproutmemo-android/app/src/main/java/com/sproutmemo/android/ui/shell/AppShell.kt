@@ -1,6 +1,8 @@
 package com.sproutmemo.android.ui.shell
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -19,26 +21,29 @@ import com.sproutmemo.android.R
 import com.sproutmemo.android.data.remote.NetworkProbeManager
 import com.sproutmemo.android.data.remote.ConnectionStatus
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Router
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.CloudOff
 import com.sproutmemo.android.data.local.TokenManager
+import com.sproutmemo.android.ui.components.StationeryIcon
+import com.sproutmemo.android.ui.components.gridPaper
 import com.sproutmemo.android.ui.theme.LocalAppColors
 import kotlinx.coroutines.launch
 
 sealed class Screen(val route: String, val title: String, val icon: String, val parentOnly: Boolean = false, val studentOnly: Boolean = false) {
-    object Dashboard : Screen("dashboard", "首页", "📊")
-    object NoteCreate : Screen("note_create", "录入习题", "✍️", studentOnly = true)
-    object NoteList : Screen("note_list", "查看习题", "📋")
-    object NoteEdit : Screen("note_edit/{noteId}", "编辑习题", "✏️", studentOnly = true)
-    object DailyReview : Screen("daily_review", "我要复习", "🎯", parentOnly = true)
-    object BookManage : Screen("book_manage", "我的习题册", "📖")
-    object ChildrenManage : Screen("children_manage", "我的孩子", "👶", parentOnly = true)
-    object Settings : Screen("settings", "设置", "⚙️")
-    object ReviewPractice : Screen("review_practice/{sessionId}", "复习答题", "✍️", studentOnly = true)
-    object DrawReview : Screen("draw_review", "抽题复习", "🎯", studentOnly = true)
-    object ReviewHistory : Screen("review_history", "复习记录", "📋")
-    object NotePreview : Screen("note_preview/{noteId}", "题目预览", "🔍")
+    object Dashboard : Screen("dashboard", "首页", "chart")
+    object NoteCreate : Screen("note_create", "录入习题", "pen", studentOnly = true)
+    object NoteList : Screen("note_list", "查看习题", "list")
+    object NoteEdit : Screen("note_edit/{noteId}", "编辑习题", "pen", studentOnly = true)
+    object DailyReview : Screen("daily_review", "我要复习", "target", parentOnly = true)
+    object BookManage : Screen("book_manage", "我的习题册", "book")
+    object ChildrenManage : Screen("children_manage", "我的孩子", "child", parentOnly = true)
+    object Settings : Screen("settings", "设置", "settings")
+    object ReviewPractice : Screen("review_practice/{sessionId}", "复习答题", "pen", studentOnly = true)
+    object DrawReview : Screen("draw_review", "抽题复习", "target", studentOnly = true)
+    object ReviewHistory : Screen("review_history", "复习记录", "list")
+    object NotePreview : Screen("note_preview/{noteId}", "题目预览", "search")
 }
 
 @Composable
@@ -87,69 +92,74 @@ fun AppShell(
         drawerState = drawerState,
         drawerContent = {
             ModalDrawerSheet(
-                drawerContainerColor = colors.cardBg,
-                modifier = Modifier.width(280.dp).fillMaxHeight()
+                drawerContainerColor = colors.paper2,
+                modifier = Modifier
+                    .width(276.dp)
+                    .fillMaxHeight()
+                    .border(1.5.dp, colors.rule)
             ) {
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
                         .statusBarsPadding()
                         .navigationBarsPadding()
-                        .padding(16.dp),
+                        .padding(horizontal = 14.dp, vertical = 12.dp),
                     verticalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Column {
+                    Column(modifier = Modifier.weight(1f)) {
                         // Header Logo
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(vertical = 24.dp, horizontal = 12.dp)
+                                .padding(vertical = 18.dp, horizontal = 10.dp)
                         ) {
                             Image(
                                 painter = painterResource(id = R.mipmap.ic_launcher),
                                 contentDescription = "Logo",
                                 modifier = Modifier
-                                    .size(40.dp)
-                                    .clip(RoundedCornerShape(8.dp))
+                                    .size(42.dp)
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .border(1.5.dp, colors.edge, RoundedCornerShape(12.dp))
                             )
                             Spacer(modifier = Modifier.width(12.dp))
-                            Text(
-                                text = "知拾",
-                                fontSize = 22.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = colors.neonBlue
-                            )
+                            Column {
+                                Text(
+                                    text = "知拾",
+                                    fontSize = 22.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = colors.textPrimary
+                                )
+                                Text(
+                                    text = "SproutMemo",
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = colors.textSecondary
+                                )
+                            }
                         }
 
-                        HorizontalDivider(color = colors.textSecondary.copy(alpha = 0.2f), thickness = 1.dp)
-                        Spacer(modifier = Modifier.height(16.dp))
+                        HorizontalDivider(color = colors.rule, thickness = 1.5.dp)
+                        Spacer(modifier = Modifier.height(14.dp))
+
+                        Text(
+                            text = "我的错题本",
+                            fontSize = 13.5.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = colors.textSecondary,
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+                        )
 
                         // 1. Top Screens (Dashboard, NoteCreate, NoteList)
                         navScreens.filter { it == Screen.Dashboard || it == Screen.NoteCreate || it == Screen.NoteList }.forEach { screen ->
-                            val isSelected = currentScreen.route == screen.route
-                            NavigationDrawerItem(
-                                label = {
-                                    Text(
-                                        text = "${screen.icon}  ${screen.title}",
-                                        fontSize = 15.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = if (isSelected) colors.neonBlue else colors.textPrimary
-                                    )
-                                },
-                                selected = isSelected,
+                            StationeryDrawerItem(
+                                iconName = screen.icon,
+                                label = screen.title,
+                                isSelected = currentScreen.route == screen.route,
                                 onClick = {
                                     onScreenSelect(screen)
                                     scope.launch { drawerState.close() }
-                                },
-                                colors = NavigationDrawerItemDefaults.colors(
-                                    selectedContainerColor = colors.neonBlue.copy(alpha = 0.15f),
-                                    unselectedContainerColor = Color.Transparent
-                                ),
-                                modifier = Modifier
-                                    .padding(vertical = 4.dp)
-                                    .height(48.dp)
-                                    .clip(RoundedCornerShape(12.dp))
+                                }
                             )
                         }
 
@@ -159,93 +169,62 @@ fun AppShell(
                                               currentScreen.route.startsWith("review_history") ||
                                               currentScreen.route.startsWith("note_preview")
                         if (userRole == "STUDENT") {
-                            NavigationDrawerItem(
-                                label = {
-                                    Text(
-                                        text = "🎯  我要复习",
-                                        fontSize = 15.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = if (isReviewSelected) colors.neonBlue else colors.textPrimary
-                                    )
-                                },
-                                selected = isReviewSelected,
+                            StationeryDrawerItem(
+                                iconName = "target",
+                                label = "我要复习",
+                                isSelected = isReviewSelected,
                                 onClick = {
                                     val targetScreen = if (userRole == "PARENT") Screen.DailyReview else Screen.DrawReview
                                     onScreenSelect(targetScreen)
                                     scope.launch { drawerState.close() }
-                                },
-                                colors = NavigationDrawerItemDefaults.colors(
-                                      selectedContainerColor = colors.neonBlue.copy(alpha = 0.15f),
-                                      unselectedContainerColor = Color.Transparent
-                                ),
-                                modifier = Modifier
-                                    .padding(vertical = 4.dp)
-                                    .height(48.dp)
-                                    .clip(RoundedCornerShape(12.dp))
+                                }
                             )
                         }
 
+                        Spacer(modifier = Modifier.height(10.dp))
+                        HorizontalDivider(color = colors.rule)
+                        Spacer(modifier = Modifier.height(10.dp))
+
+                        Text(
+                            text = "习题册配置",
+                            fontSize = 13.5.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = colors.textSecondary,
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+                        )
+
                         // 3. Bottom Screens (BookManage, ChildrenManage)
                         navScreens.filter { it != Screen.Dashboard && it != Screen.NoteCreate && it != Screen.NoteList && it != Screen.Settings }.forEach { screen ->
-                            val isSelected = currentScreen.route == screen.route
                             val displayTitle = if (screen == Screen.BookManage && userRole == "PARENT") "孩子的习题册" else screen.title
-                            NavigationDrawerItem(
-                                label = {
-                                    Text(
-                                        text = "${screen.icon}  $displayTitle",
-                                        fontSize = 15.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = if (isSelected) colors.neonBlue else colors.textPrimary
-                                    )
-                                },
-                                selected = isSelected,
+                            StationeryDrawerItem(
+                                iconName = screen.icon,
+                                label = displayTitle,
+                                isSelected = currentScreen.route == screen.route,
                                 onClick = {
                                     onScreenSelect(screen)
                                     scope.launch { drawerState.close() }
-                                },
-                                colors = NavigationDrawerItemDefaults.colors(
-                                    selectedContainerColor = colors.neonBlue.copy(alpha = 0.15f),
-                                    unselectedContainerColor = Color.Transparent
-                                ),
-                                modifier = Modifier
-                                    .padding(vertical = 4.dp)
-                                    .height(48.dp)
-                                    .clip(RoundedCornerShape(12.dp))
+                                }
                             )
                         }
                     }
 
-                    // Footer / Settings & Version Info
+                    // Footer / Settings
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(bottom = 12.dp)
+                            .padding(top = 8.dp, bottom = 8.dp)
                     ) {
-                        val isSettingsSelected = currentScreen.route == Screen.Settings.route
-                        NavigationDrawerItem(
-                            label = {
-                                Text(
-                                    text = "${Screen.Settings.icon}  ${Screen.Settings.title}",
-                                    fontSize = 15.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = if (isSettingsSelected) colors.neonBlue else colors.textPrimary
-                                )
-                            },
-                            selected = isSettingsSelected,
+                        HorizontalDivider(color = colors.rule)
+                        Spacer(modifier = Modifier.height(8.dp))
+                        StationeryDrawerItem(
+                            iconName = Screen.Settings.icon,
+                            label = Screen.Settings.title,
+                            isSelected = currentScreen.route == Screen.Settings.route,
                             onClick = {
                                 onScreenSelect(Screen.Settings)
                                 scope.launch { drawerState.close() }
-                            },
-                            colors = NavigationDrawerItemDefaults.colors(
-                                selectedContainerColor = colors.neonBlue.copy(alpha = 0.15f),
-                                unselectedContainerColor = Color.Transparent
-                            ),
-                            modifier = Modifier
-                                .padding(vertical = 4.dp)
-                                .height(48.dp)
-                                .clip(RoundedCornerShape(12.dp))
+                            }
                         )
-
                     }
                 }
             }
@@ -254,58 +233,47 @@ fun AppShell(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(colors.darkBg)
+                .gridPaper(colors.darkBg, colors.rule.copy(alpha = 0.35f))
                 .navigationBarsPadding()
         ) {
-            // Unified Hamburger Menu Top Bar
+            // Unified Stationery Top Bar
             Surface(
                 color = colors.cardBg,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .statusBarsPadding()
-                        .height(56.dp)
-                        .padding(horizontal = 16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                if (onBackPressed != null) {
-                    IconButton(onClick = onBackPressed) {
-                        Text("←", fontSize = 26.sp, color = colors.textPrimary)
-                    }
-                } else {
-                    IconButton(onClick = { scope.launch { drawerState.open() } }) {
-                        Text("☰", fontSize = 26.sp, color = colors.textPrimary)
-                    }
-                }
-                Spacer(modifier = Modifier.width(16.dp))
-                if (currentScreen == Screen.NoteEdit) {
+                Column {
                     Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .statusBarsPadding()
+                            .height(56.dp)
+                            .padding(horizontal = 16.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(
-                            text = "✏️",
-                            fontSize = 18.sp,
-                            modifier = Modifier.scale(scaleX = -1f, scaleY = 1f)
-                        )
-                        Text(
-                            text = "编辑习题",
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = colors.textPrimary
-                        )
+                    if (onBackPressed != null) {
+                        IconButton(onClick = onBackPressed) {
+                            StationeryIcon(name = "chevron-left", size = 22.dp, tint = colors.textPrimary)
+                        }
+                    } else {
+                        IconButton(onClick = { scope.launch { drawerState.open() } }) {
+                            Icon(
+                                imageVector = Icons.Default.Menu,
+                                contentDescription = "菜单",
+                                tint = colors.textPrimary
+                            )
+                        }
                     }
-                } else {
+                    Spacer(modifier = Modifier.width(10.dp))
+                    StationeryIcon(name = currentScreen.icon, size = 18.dp, tint = colors.neonBlue)
+                    Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = if (currentScreen == Screen.NoteCreate) "✍️ 录入新习题"
+                        text = if (currentScreen == Screen.NoteCreate) "录入新习题"
+                        else if (currentScreen == Screen.NoteEdit) "编辑习题"
                         else currentScreen.title,
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
                         color = colors.textPrimary
                     )
-                }
 
                 // Push all actions to the right
                 Spacer(modifier = Modifier.weight(1f))
@@ -332,7 +300,7 @@ fun AppShell(
 
                 if (currentScreen == Screen.DrawReview || currentScreen == Screen.DailyReview) {
                     IconButton(onClick = { onNavigateToHistory?.invoke() ?: onScreenSelect(Screen.ReviewHistory) }) {
-                        Text("📋", fontSize = 20.sp)
+                        StationeryIcon(name = "list", size = 20.dp, tint = colors.textPrimary)
                     }
                     Spacer(modifier = Modifier.width(8.dp))
                 }
@@ -369,14 +337,20 @@ fun AppShell(
                             .width(240.dp)
                     ) {
                         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Text(
-                                text = "📡 同步通道详情",
-                                color = colors.neonBlue,
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.Bold
-                            )
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                StationeryIcon(name = "link", size = 15.dp, tint = colors.neonBlue)
+                                Text(
+                                    text = "同步通道详情",
+                                    color = colors.neonBlue,
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
 
-                            HorizontalDivider(color = colors.textSecondary.copy(alpha = 0.3f))
+                            HorizontalDivider(color = colors.rule)
 
                             val routeTitle = when (connectionStatus) {
                                 ConnectionStatus.INTRANET -> "家庭局域网 (内网)"
@@ -393,22 +367,34 @@ fun AppShell(
                             Text(
                                 text = "物理地址:\n${activeServerUrl.ifBlank { "未连接" }}",
                                 color = colors.textSecondary,
-                                fontSize = 11.sp,
+                                fontSize = 13.sp,
                                 lineHeight = 15.sp
                             )
 
                             if (connectionStatus == ConnectionStatus.INTRANET) {
-                                Text(
-                                    text = "✨ 正在享受局域网极速同步",
-                                    color = Color(0xFF10B981),
-                                    fontSize = 11.sp
-                                )
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                ) {
+                                    StationeryIcon(name = "sprout", size = 13.dp, tint = colors.neonGreen)
+                                    Text(
+                                        text = "正在享受局域网极速同步",
+                                        color = colors.neonGreen,
+                                        fontSize = 13.sp
+                                    )
+                                }
                             } else if (connectionStatus == ConnectionStatus.EXTRANET) {
-                                Text(
-                                    text = "🌐 已切为外网云端兜底线路",
-                                    color = Color(0xFF3B82F6),
-                                    fontSize = 11.sp
-                                )
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                ) {
+                                    StationeryIcon(name = "link", size = 13.dp, tint = colors.neonBlue)
+                                    Text(
+                                        text = "已切为外网云端兜底线路",
+                                        color = colors.neonBlue,
+                                        fontSize = 13.sp
+                                    )
+                                }
                             }
 
                             if (isProbingRoute) {
@@ -416,32 +402,32 @@ fun AppShell(
                                     CircularProgressIndicator(
                                         modifier = Modifier.size(12.dp),
                                         strokeWidth = 1.6.dp,
-                                        color = Color(0xFF10B981)
+                                        color = colors.neonGreen
                                     )
                                     Spacer(modifier = Modifier.width(6.dp))
                                     Text(
                                         text = "正在探测家庭内网通道...",
-                                        color = Color(0xFF10B981),
-                                        fontSize = 11.sp,
+                                        color = colors.neonGreen,
+                                        fontSize = 13.sp,
                                         fontWeight = FontWeight.Medium
                                     )
                                 }
                             } else if (!probeStatusMessage.isNullOrBlank()) {
                                 Text(
                                     text = probeStatusMessage ?: "",
-                                    color = if (probeStatusMessage?.contains("内网") == true) Color(0xFF10B981) else colors.neonBlue,
-                                    fontSize = 11.sp,
+                                    color = if (probeStatusMessage?.contains("内网") == true) colors.neonGreen else colors.neonBlue,
+                                    fontSize = 13.sp,
                                     lineHeight = 15.sp
                                 )
                             }
 
-                            HorizontalDivider(color = colors.textSecondary.copy(alpha = 0.3f))
+                            HorizontalDivider(color = colors.rule)
 
                             Button(
                                 onClick = {
                                     NetworkProbeManager.trySwitchToIntranet(context) { success ->
                                         val statusText = if (success) "已切换至家庭局域网 (内网)" else "未检测到家庭内网服务"
-                                        android.widget.Toast.makeText(context, "📡 $statusText", android.widget.Toast.LENGTH_SHORT).show()
+                                        android.widget.Toast.makeText(context, statusText, android.widget.Toast.LENGTH_SHORT).show()
                                     }
                                 },
                                 enabled = !isProbingRoute,
@@ -451,8 +437,8 @@ fun AppShell(
                                 contentPadding = PaddingValues(0.dp)
                             ) {
                                 Text(
-                                    text = if (isProbingRoute) "正在检测..." else "⚡ 尝试连接内网通道",
-                                    fontSize = 11.sp,
+                                    text = if (isProbingRoute) "正在检测..." else "尝试连接内网通道",
+                                    fontSize = 13.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = Color.White
                                 )
@@ -460,6 +446,8 @@ fun AppShell(
                         }
                     }
                 }
+                }
+                HorizontalDivider(color = colors.rule, thickness = 1.5.dp)
             }
         }
 
@@ -473,3 +461,4 @@ fun AppShell(
         }
     }
 }
+

@@ -198,7 +198,7 @@ fun CachedVideoPlayerDialog(
                     Text(
                         text = "${formatTime(currentMs)} / ${formatTime(durationMs)}",
                         color = Color.White,
-                        fontSize = 12.sp
+                        fontSize = 13.5.sp
                     )
                     IconButton(
                         onClick = {

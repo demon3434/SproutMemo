@@ -67,7 +67,7 @@
 
               <!-- 上传按钮 -->
               <label class="upload-trigger-btn" v-if="previewUrls.length < 9">
-                <span class="upload-icon">📷</span>
+                <span class="upload-icon"><AppIcon name="camera" :size="24" /></span>
                 <span class="upload-text">添加图片</span>
                 <input
                   type="file"
@@ -89,31 +89,29 @@
           <div class="form-row">
             <div class="form-group flex-select-col">
               <label class="form-label">学习阶段<span class="required-star">*</span></label>
-              <select v-model="selectedStageId" class="custom-select" @change="onStageChange" required>
-                <option v-for="stage in activeStages" :key="stage.id" :value="stage.id">
-                  {{ stage.name }}
-                </option>
-              </select>
+              <StationerySelect
+                v-model="selectedStageId"
+                :options="(activeStages || []).map(s => ({ value: s.id, label: s.name }))"
+                @change="onStageChange"
+              />
             </div>
 
             <div class="form-group flex-select-col">
               <label class="form-label">学期<span class="required-star">*</span></label>
-              <select v-model="selectedSemesterId" class="custom-select" @change="onSemesterChange" required>
-                <option value="">-- 选择学期 --</option>
-                <option v-for="sem in filteredSemesters" :key="sem.id" :value="sem.id">
-                  {{ sem.name }}
-                </option>
-              </select>
+              <StationerySelect
+                v-model="selectedSemesterId"
+                :options="[{ value: '', label: '-- 选择学期 --' }, ...(filteredSemesters || []).map(s => ({ value: s.id, label: s.name }))]"
+                @change="onSemesterChange"
+              />
             </div>
 
             <div class="form-group flex-select-col">
               <label class="form-label">学科<span class="required-star">*</span></label>
-              <select v-model="selectedSubjectId" class="custom-select" @change="onSubjectChange" required>
-                <option value="">-- 选择学科 --</option>
-                <option v-for="sub in subjects" :key="sub.subject_id" :value="sub.subject_id">
-                  {{ sub.subject?.subject_name || '未知' }}
-                </option>
-              </select>
+              <StationerySelect
+                v-model="selectedSubjectId"
+                :options="[{ value: '', label: '-- 选择学科 --' }, ...(subjects || []).map(s => ({ value: s.subject_id, label: s.subject?.subject_name || '未知' }))]"
+                @change="onSubjectChange"
+              />
             </div>
           </div>
 
@@ -127,7 +125,8 @@
                 :class="{ active: sourceType === 'BOOK' }"
                 @click="setSourceType('BOOK')"
               >
-                📖 习题册
+                <AppIcon name="book" :size="15" />
+                <span>习题册</span>
               </button>
               <button
                 type="button"
@@ -135,7 +134,8 @@
                 :class="{ active: sourceType === 'PAPER' }"
                 @click="setSourceType('PAPER')"
               >
-                📄 试卷/其它
+                <AppIcon name="file" :size="15" />
+                <span>试卷/其它</span>
               </button>
             </div>
           </div>
@@ -145,17 +145,15 @@
             <div class="form-row">
               <div class="form-group flex-1">
                 <label class="form-label">关联习题册<span class="required-star">*</span></label>
-                <select v-model="selectedQuestionSourceId" class="custom-select" required>
-                  <option v-if="availableBooks.length === 0" value="">
-                    ⚠️ 该学科暂无可用习题册（请先在「我的习题册」中配置）
-                  </option>
-                  <option v-else value="">-- 选择已有习题册 --</option>
-                  <option v-for="book in availableBooks" :key="book.id" :value="book.id">
-                    {{ book.name }}
-                  </option>
-                </select>
+                <StationerySelect
+                  v-model="selectedQuestionSourceId"
+                  :options="[
+                    { value: '', label: availableBooks.length === 0 ? '该学科暂无可用习题册（请先配置）' : '-- 选择已有习题册 --' },
+                    ...(availableBooks || []).map(b => ({ value: b.id, label: b.name }))
+                  ]"
+                />
                 <div v-if="availableBooks.length === 0 && selectedSubjectId" style="color: #d97706; font-size: 12px; margin-top: 5px;">
-                  💡 录题只能选择已建立的习题册。若当前无对应习题册，请先前往左侧「我的习题册」提前录入书架。
+                  录题只能选择已建立的习题册。若当前无对应习题册，请先前往左侧「我的习题册」提前录入书架。
                 </div>
               </div>
             </div>
@@ -163,11 +161,10 @@
             <div class="form-row">
               <div class="form-group flex-1">
                 <label class="form-label">章节/单元<span class="required-star">*</span></label>
-                <select v-model="selectedUnitCode" class="custom-select" required>
-                  <option v-for="unit in systemUnits" :key="unit.id" :value="unit.id">
-                    {{ unit.name }}
-                  </option>
-                </select>
+                <StationerySelect
+                  v-model="selectedUnitCode"
+                  :options="(systemUnits || []).map(u => ({ value: u.id, label: u.name }))"
+                />
               </div>
               <div class="form-group flex-1">
                 <label class="form-label">页码<span class="required-star">*</span></label>
@@ -186,20 +183,18 @@
           <template v-else-if="sourceType === 'PAPER'">
             <div class="form-group">
               <label class="form-label">试卷分类<span class="required-star">*</span></label>
-              <select v-model="selectedPaperCategory" class="custom-select" required>
-                <option v-for="cat in paperCategories" :key="cat.code" :value="cat.code">
-                  {{ cat.name }}
-                </option>
-              </select>
+              <StationerySelect
+                v-model="selectedPaperCategory"
+                :options="(paperCategories || []).map(c => ({ value: c.code, label: c.name }))"
+              />
             </div>
 
             <div class="form-group">
               <label class="form-label">章节/单元<span class="required-star">*</span></label>
-              <select v-model="selectedUnitCode" class="custom-select" required>
-                <option v-for="unit in filteredSystemUnits" :key="unit.id" :value="unit.id">
-                  {{ unit.name }}
-                </option>
-              </select>
+              <StationerySelect
+                v-model="selectedUnitCode"
+                :options="(filteredSystemUnits || []).map(u => ({ value: u.id, label: u.name }))"
+              />
             </div>
 
             <div class="form-row">
@@ -241,7 +236,12 @@
                 :class="{ filled: hoverStars > 0 ? star <= hoverStars : star <= difficultyStars }"
                 @mouseenter="hoverStars = star"
                 @click="difficultyStars = star"
-              >★</span>
+              >
+                <AppIcon
+                  :name="(hoverStars > 0 ? star <= hoverStars : star <= difficultyStars) ? 'star-filled' : 'star-outline'"
+                  :size="24"
+                />
+              </span>
             </div>
           </div>
           
@@ -254,7 +254,8 @@
                 :class="{ active: masteryLevel === 'CLUELESS' }"
                 @click="masteryLevel = 'CLUELESS'"
               >
-                🔴 完全不会
+                <AppIcon name="mastery-clueless" :size="18" />
+                <span>完全不会</span>
               </button>
               <button
                 type="button"
@@ -262,7 +263,8 @@
                 :class="{ active: masteryLevel === 'PARTIAL' }"
                 @click="masteryLevel = 'PARTIAL'"
               >
-                🟡 一知半解
+                <AppIcon name="mastery-partial" :size="18" />
+                <span>一知半解</span>
               </button>
               <button
                 type="button"
@@ -270,7 +272,8 @@
                 :class="{ active: masteryLevel === 'MASTERED' }"
                 @click="masteryLevel = 'MASTERED'"
               >
-                🟢 熟练掌握
+                <AppIcon name="mastery-mastered" :size="18" />
+                <span>熟练掌握</span>
               </button>
             </div>
           </div>
@@ -317,6 +320,8 @@
 import { ref, computed } from 'vue';
 import { useNoteCreate } from './useNoteCreate.js';
 import ImageLightbox from '../components/ImageLightbox.vue';
+import AppIcon from '../components/AppIcon.vue';
+import StationerySelect from '../components/StationerySelect.vue';
 
 const hoverStars = ref(0);
 

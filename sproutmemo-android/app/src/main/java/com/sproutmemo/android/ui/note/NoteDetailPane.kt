@@ -18,6 +18,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sproutmemo.android.data.remote.ApiClient
 import com.sproutmemo.android.data.remote.model.NoteDto
+import com.sproutmemo.android.ui.components.MasteryStampRow
+import com.sproutmemo.android.ui.components.StarRatingStickerBar
+import com.sproutmemo.android.ui.components.StationeryCard
+import com.sproutmemo.android.ui.components.StationeryIcon
+import com.sproutmemo.android.ui.components.StationeryLinedNoteBox
 import com.sproutmemo.android.ui.theme.LocalAppColors
 import kotlinx.coroutines.delay
 
@@ -35,7 +40,13 @@ fun NoteDetailPane(
 
     if (note == null) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text("👈 请在左侧选择错题卡片以预览详情", color = colors.textSecondary)
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                StationeryIcon(name = "chevron-left", size = 16.dp, tint = colors.textSecondary)
+                Text("请在左侧选择错题卡片以预览详情", color = colors.textSecondary)
+            }
         }
         return
     }
@@ -87,13 +98,13 @@ fun NoteDetailPane(
             }
             pendingMastery?.let { m ->
                 val label = when (m) {
-                    "CLUELESS" -> "🔴 完全不会"
-                    "PARTIAL" -> "🟡 一知半解"
-                    else -> "🟢 熟练掌握"
+                    "CLUELESS" -> "完全不会"
+                    "PARTIAL" -> "一知半解"
+                    else -> "熟练掌握"
                 }
                 add("掌握程度 → $label")
             }
-            pendingReviewPool?.let { add("复习题库 → ${if (it) "✅ 纳入" else "⬜ 排除"}") }
+            pendingReviewPool?.let { add("复习题库 → ${if (it) "纳入" else "排除"}") }
         }
         AlertDialog(
             onDismissRequest = {
@@ -141,43 +152,41 @@ fun NoteDetailPane(
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(colors.cardBg, shape = RoundedCornerShape(16.dp))
-                .padding(16.dp)
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+        StationeryCard(
+            modifier = Modifier.fillMaxSize()
         ) {
-            // Header
-            Row(Modifier.fillMaxWidth(), Arrangement.SpaceBetween, Alignment.CenterVertically) {
-                Column(Modifier.weight(1f)) {
-                    Text(
-                        text = "${note.subject_name ?: "未知学科"} · ${note.semester_name ?: ""}",
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = colors.textPrimary
-                    )
-                }
-                Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
-                    if (userRole != "PARENT") {
-                        IconButton(onClick = { onEdit(note.id) }, Modifier.size(36.dp)) {
-                            Text(
-                                text = "✏️",
-                                fontSize = 16.sp,
-                                modifier = Modifier.scale(scaleX = -1f, scaleY = 1f)
-                            )
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp)
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                // Header
+                Row(Modifier.fillMaxWidth(), Arrangement.SpaceBetween, Alignment.CenterVertically) {
+                    Column(Modifier.weight(1f)) {
+                        Text(
+                            text = "${note.subject_name ?: "未知学科"} · ${note.semester_name ?: ""}",
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = colors.textPrimary
+                        )
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
+                        if (userRole != "PARENT") {
+                            IconButton(onClick = { onEdit(note.id) }, Modifier.size(36.dp)) {
+                                StationeryIcon(name = "pen", size = 18.dp, tint = colors.neonBlue)
+                            }
+                        }
+                        if (userRole != "PARENT") {
+                            IconButton(onClick = { showDeleteDialog = true }, Modifier.size(36.dp)) {
+                                StationeryIcon(name = "trash", size = 18.dp, tint = colors.neonRed)
+                            }
                         }
                     }
-                    if (userRole != "PARENT") {
-                        IconButton(onClick = { showDeleteDialog = true }, Modifier.size(36.dp)) {
-                            Text("🗑️", fontSize = 16.sp)
-                        }
-                    }
                 }
-            }
 
-            HorizontalDivider(color = colors.textSecondary.copy(alpha = 0.2f))
+                HorizontalDivider(color = colors.rule)
 
             // Source Info — flow layout
             DetailSection("习题来源") {
@@ -189,30 +198,30 @@ fun NoteDetailPane(
                 }
                 Text(
                     text = flowText,
-                    fontSize = 13.sp,
+                    fontSize = 15.sp,
                     color = colors.textPrimary,
-                    lineHeight = 18.sp
+                    lineHeight = 22.sp
                 )
-                Spacer(Modifier.height(2.dp))
+                Spacer(Modifier.height(4.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     Text(
                         text = "写于：${note.created_at?.substringBefore('T') ?: "—"}",
-                        fontSize = 11.sp,
-                        color = colors.textSecondary.copy(alpha = 0.7f)
+                        fontSize = 13.sp,
+                        color = colors.textSecondary.copy(alpha = 0.85f)
                     )
                     Text(
                         text = "改于：${note.updated_at?.substringBefore('T') ?: "—"}",
-                        fontSize = 11.sp,
-                        color = colors.textSecondary.copy(alpha = 0.7f)
+                        fontSize = 13.sp,
+                        color = colors.textSecondary.copy(alpha = 0.85f)
                     )
                 }
             }
 
             // Difficulty & Status — inline interactive controls
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 val currentStars = note.difficulty_stars.toInt()
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -220,100 +229,52 @@ fun NoteDetailPane(
                 ) {
                     Text(
                         "难度星级",
-                        fontSize = 12.sp,
+                        fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
                         color = colors.neonBlue,
-                        modifier = Modifier.width(80.dp)
+                        modifier = Modifier.width(90.dp)
                     )
                     Row(
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        (1..5).forEach { star ->
-                            val filled = star <= currentStars
-                            Text(
-                                text = if (filled) "★" else "☆",
-                                fontSize = 24.sp,
-                                color = if (filled) Color(0xFFF59E0B) else colors.textSecondary.copy(alpha = 0.4f),
-                                modifier = if (userRole != "PARENT") Modifier.clickable {
+                        StarRatingStickerBar(
+                            stars = currentStars,
+                            onStarsChange = if (userRole != "PARENT") {
+                                { star ->
                                     pendingDifficulty = star.toFloat()
                                     showConfirmDialog = true
-                                } else Modifier
-                            )
-                        }
+                                }
+                            } else null,
+                            starSize = 24.dp
+                        )
                         Text(
                             "($currentStars 星)",
-                            fontSize = 12.sp,
+                            fontSize = 14.sp,
                             color = colors.textSecondary,
                             modifier = Modifier.padding(start = 4.dp)
                         )
                     }
                 }
 
-                // Mastery Level
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
+                // Mastery Level (Solid Card-Stock Stamps)
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     Text(
                         "掌握程度",
-                        fontSize = 12.sp,
+                        fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
-                        color = colors.neonBlue,
-                        modifier = Modifier.width(80.dp)
+                        color = colors.neonBlue
                     )
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        listOf(
-                            Triple("CLUELESS", "完全不会", Color(0xFFEF4444)),
-                            Triple("PARTIAL", "一知半解", Color(0xFFF59E0B)),
-                            Triple("MASTERED", "熟练掌握", Color(0xFF10B981))
-                        ).forEach { (code, label, chipColor) ->
-                            val selected = note.mastery_level == code
-                            val emoji = when (code) {
-                                "CLUELESS" -> "🔴"
-                                "PARTIAL" -> "🟡"
-                                else -> "🟢"
-                            }
-                            OutlinedButton(
-                                onClick = {
-                                    if (userRole != "PARENT" && !selected) {
-                                        pendingMastery = code
-                                        showConfirmDialog = true
-                                    }
-                                },
-                                modifier = Modifier.weight(1f).height(38.dp),
-                                shape = RoundedCornerShape(8.dp),
-                                colors = ButtonDefaults.outlinedButtonColors(
-                                    containerColor = if (selected) chipColor.copy(alpha = 0.15f) else Color.Transparent,
-                                    contentColor = if (selected) chipColor else colors.textSecondary
-                                ),
-                                border = androidx.compose.foundation.BorderStroke(
-                                    width = if (selected) 1.5.dp else 1.dp,
-                                    color = if (selected) chipColor else colors.textSecondary.copy(alpha = 0.3f)
-                                ),
-                                contentPadding = PaddingValues(horizontal = 2.dp, vertical = 4.dp),
-                                enabled = userRole != "PARENT" || selected
-                            ) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.Center,
-                                    modifier = Modifier.fillMaxWidth()
-                                ) {
-                                    Text(emoji, fontSize = 12.sp)
-                                    Spacer(modifier = Modifier.width(2.dp))
-                                    Text(
-                                        text = label,
-                                        fontSize = 10.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        maxLines = 1
-                                    )
-                                }
+                    MasteryStampRow(
+                        selectedLevel = note.mastery_level,
+                        enabled = userRole != "PARENT",
+                        onSelect = { code ->
+                            if (userRole != "PARENT" && note.mastery_level != code) {
+                                pendingMastery = code
+                                showConfirmDialog = true
                             }
                         }
-                    }
+                    )
                 }
 
                 // Review Pool Toggle
@@ -324,7 +285,7 @@ fun NoteDetailPane(
                 ) {
                     Text(
                         "纳入复习题库",
-                        fontSize = 12.sp,
+                        fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
                         color = colors.neonBlue
                     )
@@ -346,12 +307,7 @@ fun NoteDetailPane(
 
             // Auxiliary text
             DetailSection("题目与解析") {
-                Text(
-                    text = note.auxiliary_text ?: "(暂无文字描述)",
-                    fontSize = 14.sp,
-                    color = if (note.auxiliary_text.isNullOrBlank()) colors.textSecondary else colors.textPrimary,
-                    lineHeight = 22.sp
-                )
+                StationeryLinedNoteBox(text = note.auxiliary_text)
             }
 
             // Images
@@ -389,6 +345,7 @@ fun NoteDetailPane(
 
             Spacer(Modifier.height(16.dp))
         }
+        }
 
         snackMsg?.let { msg ->
             LaunchedEffect(msg) { delay(2500); snackMsg = null }
@@ -403,8 +360,8 @@ fun NoteDetailPane(
 @Composable
 private fun DetailSection(title: String, content: @Composable ColumnScope.() -> Unit) {
     val colors = LocalAppColors.current
-    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        Text(title, fontSize = 12.sp, fontWeight = FontWeight.Bold, color = colors.neonBlue)
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(title, fontSize = 14.5.sp, fontWeight = FontWeight.Bold, color = colors.neonBlue)
         content()
     }
 }

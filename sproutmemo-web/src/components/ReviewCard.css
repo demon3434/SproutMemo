@@ -1,0 +1,363 @@
+@import url(./ReviewCardFeedback.css);
+
+.review-card-container {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  height: 100%;
+  overflow: hidden;
+}
+
+.split-layout {
+  display: flex;
+  height: 100%;
+}
+
+/* 左侧栏样式 */
+.layout-left-pane {
+  flex: 1.6; /* 占比约 65% */
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  background: var(--bg-card);
+}
+
+.pane-content-wrapper {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.source-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-main);
+  padding: 10px 16px;
+  border-radius: var(--radius-sm);
+  border: 1px dashed var(--border);
+}
+
+.source-text {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.page-badge {
+  font-size: 11px;
+  font-weight: 700;
+  background: var(--primary-light);
+  color: var(--primary);
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+.body-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.body-text {
+  font-size: 15px;
+  color: var(--text-main);
+  line-height: 1.6;
+  background: var(--bg-main);
+  padding: 16px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  white-space: pre-wrap;
+}
+
+/* 图片附件网格 */
+.image-gallery-block {
+  margin-bottom: 12px;
+}
+
+.preview-images-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 12px;
+}
+
+.img-thumb-card {
+  aspect-ratio: 1;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: #f1f5f9;
+  cursor: pointer;
+  position: relative;
+  transition: var(--transition);
+}
+
+.img-thumb-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--primary);
+}
+
+.img-thumb-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.img-title-overlay {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  background: rgba(15, 23, 42, 0.75);
+  color: #fff;
+  font-size: 10px;
+  padding: 3px 6px;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 音频列表 */
+.audio-gallery-block {
+  margin-bottom: 12px;
+}
+
+.audio-players-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.audio-player-item {
+  background: var(--bg-main);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.audio-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.audio-filename {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--text-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.custom-audio {
+  width: 100%;
+  height: 32px;
+}
+
+/* 视频列表 */
+.video-gallery-block {
+  margin-bottom: 12px;
+}
+
+.video-players-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.video-player-item {
+  background: var(--bg-main);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.custom-video {
+  width: 100%;
+  border-radius: var(--radius-sm);
+  background: #000;
+  max-height: 240px;
+  object-fit: contain;
+}
+
+/* 右侧栏样式 */
+.layout-right-pane {
+  flex: 0.9; /* 占比约 35% */
+  background: var(--bg-main);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+/* 进度及计时器 */
+.summary-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 24px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-card);
+}
+
+.session-progress {
+  font-size: 13.5px;
+  color: var(--text-main);
+}
+
+.timer-display {
+  font-family: monospace;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--primary);
+  background: var(--primary-light);
+  padding: 4px 12px;
+  border-radius: var(--radius-sm);
+}
+
+.timer-display.paused {
+  color: var(--text-muted);
+  background: var(--border);
+}
+
+/* 面包屑导航 */
+.breadcrumbs-container {
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-card);
+}
+
+.breadcrumb-label, .feedback-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+  text-transform: uppercase;
+}
+
+.breadcrumb-tiles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.breadcrumb-tile {
+  width: 38px;
+  height: 38px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg-main);
+  color: var(--text-main);
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  position: relative;
+  transition: var(--transition);
+}
+
+.breadcrumb-tile:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.breadcrumb-tile.active {
+  background: var(--primary);
+  color: #ffffff;
+  border-color: var(--primary);
+}
+
+.breadcrumb-tile.completed {
+  border-color: var(--primary);
+  background: rgba(16, 185, 129, 0.05);
+  color: var(--primary);
+}
+
+.breadcrumb-tile.completed.active {
+  background: var(--primary);
+  color: #ffffff;
+}
+
+.completed-dot {
+  position: absolute;
+  top: -2px;
+  right: 1px;
+  font-size: 8px;
+  color: var(--primary);
+  font-weight: bold;
+}
+
+.breadcrumb-tile.active .completed-dot {
+  color: #ffffff;
+}
+
+/* 打卡卡片 */
+.feedback-card {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.required-hint {
+  color: var(--danger);
+  font-size: 10px;
+}
+
+.outcomes-button-group {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+}
+
+.outcome-btn-capsule {
+  flex: 1;
+  height: 40px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--btn-theme);
+  background: var(--bg-card);
+  color: var(--btn-theme);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.outcome-btn-capsule:hover {
+  background: var(--btn-theme);
+  color: #ffffff;
+  opacity: 0.9;
+}
+
+.outcome-btn-capsule.selected {
+  background: var(--btn-theme);
+  border-color: var(--btn-theme);
+  color: #ffffff;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+/* 星级评分 */
+.star-rating-box {
+  display: flex;
+  gap: 4px;
+}
+
+.star-item {
+  font-size: 28px;
+  color: #cbd5e1;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.star-item:hover, .star-item.filled {
+  color: #f59e0b;
+}
+

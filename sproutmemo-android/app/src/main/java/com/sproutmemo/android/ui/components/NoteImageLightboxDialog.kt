@@ -175,6 +175,8 @@ fun NoteImageLightboxDialog(
         }
     }
 
+    val colors = com.sproutmemo.android.ui.theme.LocalAppColors.current
+
     Dialog(
         onDismissRequest = handleDismiss,
         properties = DialogProperties(
@@ -186,7 +188,7 @@ fun NoteImageLightboxDialog(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.Black.copy(alpha = 0.92f))
+                .background(colors.darkBg.copy(alpha = 0.96f))
         ) {
             // Zoomable & Pannable Image Layer
             Box(
@@ -234,40 +236,40 @@ fun NoteImageLightboxDialog(
                 )
             }
 
-            // Floating Semi-Transparent Left Rotate Button (Left Side)
+            // Floating Stationery Left Rotate Button (Left Side)
             Box(
                 modifier = Modifier
                     .align(Alignment.CenterStart)
                     .padding(start = 16.dp)
                     .size(50.dp)
                     .clip(CircleShape)
-                    .background(Color.Black.copy(alpha = 0.48f), CircleShape)
-                    .border(1.dp, Color.White.copy(alpha = 0.32f), CircleShape)
+                    .background(colors.cardBg.copy(alpha = 0.92f), CircleShape)
+                    .border(1.5.dp, colors.edge, CircleShape)
                     .clickable { triggerRotate(-90) },
                 contentAlignment = Alignment.Center
             ) {
                 PhotoFrameRotateIcon(
                     size = 24.dp,
-                    tint = Color.White,
+                    tint = colors.textPrimary,
                     clockwise = false
                 )
             }
 
-            // Floating Semi-Transparent Right Rotate Button (Right Side)
+            // Floating Stationery Right Rotate Button (Right Side)
             Box(
                 modifier = Modifier
                     .align(Alignment.CenterEnd)
                     .padding(end = 16.dp)
                     .size(50.dp)
                     .clip(CircleShape)
-                    .background(Color.Black.copy(alpha = 0.48f), CircleShape)
-                    .border(1.dp, Color.White.copy(alpha = 0.32f), CircleShape)
+                    .background(colors.cardBg.copy(alpha = 0.92f), CircleShape)
+                    .border(1.5.dp, colors.edge, CircleShape)
                     .clickable { triggerRotate(90) },
                 contentAlignment = Alignment.Center
             ) {
                 PhotoFrameRotateIcon(
                     size = 24.dp,
-                    tint = Color.White,
+                    tint = colors.textPrimary,
                     clockwise = true
                 )
             }
@@ -280,13 +282,13 @@ fun NoteImageLightboxDialog(
                     .statusBarsPadding()
                     .padding(16.dp)
                     .size(42.dp)
-                    .background(Color.Black.copy(alpha = 0.5f), CircleShape)
-                    .border(1.dp, Color.White.copy(alpha = 0.25f), CircleShape)
+                    .background(colors.cardBg.copy(alpha = 0.92f), CircleShape)
+                    .border(1.5.dp, colors.edge, CircleShape)
             ) {
-                Icon(
-                    imageVector = Icons.Default.Close,
-                    contentDescription = "关闭预览",
-                    tint = Color.White
+                StationeryIcon(
+                    name = "close",
+                    size = 18.dp,
+                    tint = colors.textPrimary
                 )
             }
 
@@ -296,8 +298,8 @@ fun NoteImageLightboxDialog(
                     .align(Alignment.BottomCenter)
                     .navigationBarsPadding()
                     .padding(bottom = 24.dp)
-                    .background(Color.Black.copy(alpha = 0.6f), RoundedCornerShape(24.dp))
-                    .border(1.dp, Color.White.copy(alpha = 0.18f), RoundedCornerShape(24.dp))
+                    .background(colors.cardBg.copy(alpha = 0.95f), RoundedCornerShape(24.dp))
+                    .border(1.5.dp, colors.edge, RoundedCornerShape(24.dp))
                     .padding(horizontal = 12.dp, vertical = 4.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(6.dp)
@@ -309,17 +311,17 @@ fun NoteImageLightboxDialog(
                         contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
                         modifier = Modifier.defaultMinSize(minWidth = 32.dp, minHeight = 32.dp)
                     ) {
-                        Text(
-                            "◀",
-                            color = if (selectedIndex > 0) Color.White else Color.White.copy(alpha = 0.3f),
-                            fontSize = 15.sp
+                        StationeryIcon(
+                            name = "chevron-left",
+                            size = 16.dp,
+                            tint = if (selectedIndex > 0) colors.textPrimary else colors.textSecondary.copy(alpha = 0.35f)
                         )
                     }
                     Text(
                         text = "${selectedIndex + 1}/${lockedUrls.size}",
-                        color = Color.White,
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.SemiBold
+                        color = colors.textPrimary,
+                        fontSize = 13.5.sp,
+                        fontWeight = FontWeight.Bold
                     )
                     TextButton(
                         onClick = { if (selectedIndex < lockedUrls.lastIndex) selectedIndex++ },
@@ -327,13 +329,13 @@ fun NoteImageLightboxDialog(
                         contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
                         modifier = Modifier.defaultMinSize(minWidth = 32.dp, minHeight = 32.dp)
                     ) {
-                        Text(
-                            "▶",
-                            color = if (selectedIndex < lockedUrls.lastIndex) Color.White else Color.White.copy(alpha = 0.3f),
-                            fontSize = 15.sp
+                        StationeryIcon(
+                            name = "chevron-right",
+                            size = 16.dp,
+                            tint = if (selectedIndex < lockedUrls.lastIndex) colors.textPrimary else colors.textSecondary.copy(alpha = 0.35f)
                         )
                     }
-                    Text("|", color = Color.White.copy(alpha = 0.35f), fontSize = 14.sp)
+                    Text("|", color = colors.rule, fontSize = 14.sp)
                 }
 
                 TextButton(
@@ -341,12 +343,12 @@ fun NoteImageLightboxDialog(
                     contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
                     modifier = Modifier.defaultMinSize(minWidth = 32.dp, minHeight = 32.dp)
                 ) {
-                    Text("➖", color = Color.White, fontSize = 14.sp)
+                    StationeryIcon(name = "minus", size = 16.dp, tint = colors.textPrimary)
                 }
                 Text(
                     text = "${(zoomScale * 100).roundToInt()}%",
-                    color = Color.White,
-                    fontSize = 13.sp,
+                    color = colors.textPrimary,
+                    fontSize = 13.5.sp,
                     fontWeight = FontWeight.Bold
                 )
                 TextButton(
@@ -354,7 +356,7 @@ fun NoteImageLightboxDialog(
                     contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
                     modifier = Modifier.defaultMinSize(minWidth = 32.dp, minHeight = 32.dp)
                 ) {
-                    Text("➕", color = Color.White, fontSize = 14.sp)
+                    StationeryIcon(name = "plus", size = 16.dp, tint = colors.textPrimary)
                 }
                 TextButton(
                     onClick = {
@@ -364,7 +366,7 @@ fun NoteImageLightboxDialog(
                     contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
                     modifier = Modifier.defaultMinSize(minWidth = 32.dp, minHeight = 32.dp)
                 ) {
-                    Text("重置", color = Color.White.copy(alpha = 0.9f), fontSize = 12.sp)
+                    Text("重置", color = colors.neonBlue, fontSize = 13.sp, fontWeight = FontWeight.Bold)
                 }
             }
         }

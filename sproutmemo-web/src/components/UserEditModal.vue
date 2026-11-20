@@ -1,7 +1,7 @@
 <template>
   <div v-if="visible" class="modal-overlay" @click.self="$emit('close')">
     <div class="modal-card">
-      <h3 class="modal-title">✏️ 编辑用户账号</h3>
+      <h3 class="modal-title">编辑用户账号</h3>
       <p class="modal-subtitle">修改账号基础信息、学籍档案或关联绑定的学生孩子。</p>
 
       <div v-if="errorMsg" class="error-banner">
@@ -76,7 +76,7 @@
               class="btn btn-secondary select-child-btn" 
               @click="showChildModal = true"
             >
-              🔍 选择孩子 (已选 {{ form.student_ids.length }})
+              选择孩子 (已选 {{ form.student_ids.length }})
             </button>
           </div>
           
@@ -94,7 +94,7 @@
         <div class="modal-actions" style="margin-top: 24px;">
           <button type="button" class="btn btn-secondary action-btn" @click="$emit('close')">取消</button>
           <button type="submit" class="btn btn-primary action-btn" :disabled="isSubmitting">
-            {{ isSubmitting ? '保存中...' : '💾 保存修改' }}
+            {{ isSubmitting ? '保存中...' : '保存修改' }}
           </button>
         </div>
       </form>

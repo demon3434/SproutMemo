@@ -3,105 +3,80 @@
     <!-- 收缩极简状态栏 -->
     <div v-if="isCollapsed" class="collapsed-bar">
       <div class="status-tags">
-        <span class="tag-pill current-tag">📚 {{ currentSemesterName }}</span>
+        <span class="tag-pill current-tag"><AppIcon name="book" :size="14" /> {{ currentSemesterName }}</span>
         <span class="tag-pill" v-if="currentSubjectName">学科: {{ currentSubjectName }}</span>
         <span class="tag-pill" v-if="currentUnitName">单元: {{ currentUnitName }}</span>
-        <span class="tag-pill strategy-tag">🎯 {{ currentStrategyName }}</span>
+        <span class="tag-pill strategy-tag"><AppIcon name="target" :size="14" /> {{ currentStrategyName }}</span>
         <span class="tag-pill progress-tag">进度: {{ completedCount }} / {{ totalCount }} 题</span>
       </div>
       <button class="expand-btn" @click="toggleCollapse">
-        ⚙️ 调整参数
+        <AppIcon name="settings" :size="14" /> 调整参数
       </button>
     </div>
 
     <!-- 展开内联单行控制栏 -->
     <div v-else class="expanded-bar">
       <div class="filter-inputs">
-        <!-- 学习阶段 (Stage) -->
         <div class="filter-item">
           <label>学习阶段</label>
-          <select v-model="form.stageId" @change="onStageChange">
-            <option value="">全部阶段</option>
-            <option v-for="st in presets.stages" :key="st.id" :value="st.id">{{ st.name }}</option>
-          </select>
+          <StationerySelect
+            v-model="form.stageId"
+            :options="stageOptions"
+            compact
+            @change="onStageChange"
+          />
         </div>
 
-        <!-- 学期 (Semester) -->
         <div class="filter-item">
           <label>学期</label>
-          <select v-model="form.semesterId" @change="onSemesterChange">
-            <option v-for="s in filteredSemesters" :key="s.id" :value="s.id">{{ s.name }}</option>
-          </select>
+          <StationerySelect
+            v-model="form.semesterId"
+            :options="semesterOptions"
+            compact
+            @change="onSemesterChange"
+          />
         </div>
 
-        <!-- 学科 (Subject) -->
         <div class="filter-item">
           <label>学科</label>
-          <select v-model="form.subjectId" @change="onSubjectChange">
-            <option value="">全部学科</option>
-            <option v-for="sub in subjects" :key="sub.id" :value="sub.subject_id">
-              {{ sub.subject?.subject_name || '未知' }}
-            </option>
-          </select>
+          <StationerySelect
+            v-model="form.subjectId"
+            :options="subjectOptions"
+            compact
+            @change="onSubjectChange"
+          />
         </div>
 
-        <!-- 单元/阶段 (Unit) -->
         <div class="filter-item">
           <label>单元/阶段</label>
-          <select v-model="form.unitCode">
-            <option value="">全部单元</option>
-            <option v-for="u in units" :key="u.id" :value="u.id">{{ u.name }}</option>
-          </select>
+          <StationerySelect
+            v-model="form.unitCode"
+            :options="unitOptions"
+            compact
+          />
         </div>
 
-        <!-- 题量档位 (自定义高保真下拉选择器，悬浮项出气泡) -->
         <div class="filter-item">
           <label>题量档位</label>
-          <div class="custom-select" ref="countSelectRef">
-            <div class="select-trigger" @click="toggleCountDropdown">
-              <span>{{ getPresetShowName(selectedCountPreset) }}</span>
-              <span class="arrow-icon">▼</span>
-            </div>
-            <div v-show="isCountDropdownOpen" class="select-options">
-              <div 
-                v-for="p in presets.count_presets" 
-                :key="p.code" 
-                class="select-option tooltip-box-left"
-                :data-tooltip="`复习量: ${p.count_value} 题`"
-                :class="{ active: form.countPresetCode === p.code }"
-                @click="selectCountPreset(p.code)"
-              >
-                {{ getPresetShowName(p) }}
-              </div>
-            </div>
-          </div>
+          <StationerySelect
+            v-model="form.countPresetCode"
+            :options="countPresetOptions"
+            compact
+          />
         </div>
 
-        <!-- 筛题策略 (自定义高保真下拉选择器，悬浮项出气泡) -->
         <div class="filter-item">
           <label>筛题策略</label>
-          <div class="custom-select" ref="strategySelectRef">
-            <div class="select-trigger" @click="toggleStrategyDropdown">
-              <span>{{ selectedStrategyName }}</span>
-              <span class="arrow-icon">▼</span>
-            </div>
-            <div v-show="isStrategyDropdownOpen" class="select-options">
-              <div 
-                v-for="st in presets.strategies" 
-                :key="st.code" 
-                class="select-option tooltip-box-left"
-                :data-tooltip="st.description || st.name"
-                :class="{ active: form.strategyCode === st.code }"
-                @click="selectStrategy(st.code)"
-              >
-                {{ st.name }}
-              </div>
-            </div>
-          </div>
+          <StationerySelect
+            v-model="form.strategyCode"
+            :options="strategyOptions"
+            compact
+          />
         </div>
 
         <button class="generate-btn" :disabled="loading" @click="handleGenerate">
-          {{ loading ? '抽题中...' : '🚀 抽题复习' }}
+          <AppIcon name="target" :size="16" />
+          <span>{{ loading ? '抽题中...' : '抽题复习' }}</span>
         </button>
       </div>
 
@@ -114,6 +89,8 @@
 
 <script setup>
 import { ref, computed, reactive, watch, onMounted, onUnmounted } from 'vue';
+import StationerySelect from './StationerySelect.vue';
+import AppIcon from './AppIcon.vue';
 
 const props = defineProps({
   subjects: { type: Array, default: () => [] },
@@ -194,6 +171,44 @@ onMounted(() => {
 onUnmounted(() => {
   document.removeEventListener('click', handleOutsideClick);
 });
+
+const stageOptions = computed(() => [
+  { value: '', label: '全部阶段' },
+  ...(props.presets.stages || []).map(st => ({ value: st.id, label: st.name }))
+]);
+
+const semesterOptions = computed(() =>
+  (filteredSemesters.value || []).map(s => ({ value: s.id, label: s.name }))
+);
+
+const subjectOptions = computed(() => [
+  { value: '', label: '全部学科' },
+  ...(props.subjects || []).map(sub => ({
+    value: sub.subject_id,
+    label: sub.subject?.subject_name || '未知'
+  }))
+]);
+
+const unitOptions = computed(() => [
+  { value: '', label: '全部单元' },
+  ...(props.units || []).map(u => ({ value: u.id, label: u.name }))
+]);
+
+const countPresetOptions = computed(() =>
+  (props.presets.count_presets || []).map(p => ({
+    value: p.code,
+    label: getPresetShowName(p),
+    tooltip: `${p.count_value} 题`
+  }))
+);
+
+const strategyOptions = computed(() =>
+  (props.presets.strategies || []).map(st => ({
+    value: st.code,
+    label: st.name,
+    tooltip: st.description || ''
+  }))
+);
 
 // 监听初始学期
 watch(() => props.initialSemesterId, (val) => {
@@ -287,256 +302,4 @@ defineExpose({
 });
 </script>
 
-<style scoped>
-.review-filter-header {
-  background: var(--bg-card);
-  border-bottom: 1px solid var(--border);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: var(--shadow-sm);
-  border-radius: var(--radius-md);
-  margin-bottom: 16px;
-  overflow: visible;
-}
-
-/* 收缩单行极简条 */
-.collapsed-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 38px;
-  padding: 0 16px;
-  background: var(--bg-main);
-  border-radius: var(--radius-md);
-}
-
-.status-tags {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  overflow-x: auto;
-}
-
-.tag-pill {
-  font-size: 12px;
-  padding: 3px 10px;
-  border-radius: 12px;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  color: var(--text-main);
-  white-space: nowrap;
-}
-
-.tag-pill.current-tag {
-  background: rgba(16, 185, 129, 0.1);
-  color: var(--primary);
-  border-color: rgba(16, 185, 129, 0.2);
-  font-weight: 600;
-}
-
-.tag-pill.strategy-tag {
-  background: rgba(245, 158, 11, 0.1);
-  color: var(--warning);
-  border-color: rgba(245, 158, 11, 0.2);
-}
-
-.tag-pill.progress-tag {
-  background: rgba(59, 130, 246, 0.1);
-  color: #3b82f6;
-  border-color: rgba(59, 130, 246, 0.2);
-  font-weight: 600;
-}
-
-.expand-btn, .close-expand-btn {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 4px 12px;
-  font-size: 12px;
-  color: var(--text-main);
-  cursor: pointer;
-  white-space: nowrap;
-  transition: var(--transition);
-}
-
-.expand-btn:hover, .close-expand-btn:hover {
-  background: var(--bg-sidebar-hover);
-  border-color: var(--primary);
-}
-
-/* 展开单行 Header */
-.expanded-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 18px;
-  gap: 16px;
-  background: var(--bg-card);
-  border-radius: var(--radius-md);
-  overflow: visible;
-}
-
-.filter-inputs {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  flex-wrap: wrap;
-  flex: 1;
-  overflow: visible;
-}
-
-.filter-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  position: relative;
-}
-
-.filter-item label {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-muted);
-  white-space: nowrap;
-}
-
-.filter-item select {
-  height: 34px;
-  padding: 0 10px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  font-size: 13px;
-  background: var(--bg-main);
-  color: var(--text-main);
-  outline: none;
-  transition: var(--transition);
-}
-
-.filter-item select:focus {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 2px var(--primary-light);
-}
-
-/* 自定义下拉选择器 */
-.custom-select {
-  position: relative;
-  width: 120px;
-  user-select: none;
-}
-
-.select-trigger {
-  height: 34px;
-  padding: 0 10px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  font-size: 13px;
-  background: var(--bg-main);
-  color: var(--text-main);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  cursor: pointer;
-  transition: var(--transition);
-}
-
-.select-trigger:hover {
-  border-color: var(--primary);
-}
-
-.arrow-icon {
-  font-size: 9px;
-  color: var(--text-muted);
-  margin-left: 6px;
-}
-
-.select-options {
-  position: absolute;
-  top: 105%;
-  left: 0;
-  width: 100%;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  box-shadow: var(--shadow-md);
-  z-index: 150;
-  overflow: visible;
-}
-
-.select-option {
-  padding: 8px 10px;
-  font-size: 12.5px;
-  color: var(--text-main);
-  cursor: pointer;
-  transition: var(--transition);
-  white-space: nowrap;
-}
-
-.select-option:hover {
-  background: var(--bg-sidebar-hover);
-  color: var(--primary);
-}
-
-.select-option.active {
-  background: var(--primary-light);
-  color: var(--primary);
-  font-weight: 700;
-}
-
-.generate-btn {
-  height: 34px;
-  padding: 0 18px;
-  background: var(--primary);
-  color: var(--text-light);
-  border: none;
-  border-radius: var(--radius-sm);
-  font-size: 13px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: var(--transition);
-  white-space: nowrap;
-}
-
-.generate-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.generate-btn:hover:not(:disabled) {
-  background: var(--primary-hover);
-  transform: translateY(-1px);
-}
-
-/* 选项水平左向气泡 Tooltip */
-.tooltip-box-left {
-  position: relative;
-}
-
-.tooltip-box-left::after {
-  content: attr(data-tooltip);
-  position: absolute;
-  right: 110%; /* 浮现在选项的左侧 */
-  top: 50%;
-  transform: translateY(-50%) translateX(6px);
-  background: #1e293b;
-  color: #ffffff;
-  padding: 6px 12px;
-  border-radius: 6px;
-  font-size: 11px;
-  font-weight: 500;
-  white-space: nowrap;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.15s ease, transform 0.15s ease;
-  z-index: 250; /* 确保盖在所有下拉层级之上 */
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.tooltip-box-left:hover::after {
-  opacity: 1;
-  transform: translateY(-50%) translateX(0);
-}
-
-.dark-mode .tooltip-box-left::after {
-  background: #0f172a;
-  border-color: var(--border);
-}
-</style>
+<style scoped src="./ReviewFilterHeader.css"></style>

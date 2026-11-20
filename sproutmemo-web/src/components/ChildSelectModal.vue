@@ -9,7 +9,7 @@
           type="text" 
           v-model="filterText" 
           class="form-control filter-input" 
-          placeholder="🔍 输入孩子昵称或用户名快速过滤..." 
+          placeholder="输入孩子昵称或用户名快速过滤..." 
         />
       </div>
 

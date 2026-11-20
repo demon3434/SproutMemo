@@ -21,6 +21,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.sproutmemo.android.ui.theme.AppIconsMap
 import com.sproutmemo.android.ui.theme.AppThemeColors
 
 /**
@@ -37,25 +38,32 @@ fun SelectableOptionCard(
 ) {
     // 亮色高亮主题（例如柠檬黄）防白字不可见：计算 neonBlue 的明度
     val isLightAccent = (colors.neonBlue.red * 0.299f + colors.neonBlue.green * 0.587f + colors.neonBlue.blue * 0.114f) > 0.68f
-    val selectedContentColor = if (isLightAccent) Color(0xFF1E293B) else Color.White
+    val selectedContentColor = if (isLightAccent) colors.textPrimary else Color.White
 
     val targetBgColor = if (isSelected) colors.neonBlue else colors.cardBg
-    val targetBorderColor = if (isSelected) colors.neonBlue else colors.textSecondary.copy(alpha = 0.25f)
+    val targetBorderColor = if (isSelected) colors.accentDeep else colors.edge
     val targetContentColor = if (isSelected) selectedContentColor else colors.textSecondary
 
     val animatedBg by animateColorAsState(targetBgColor, animationSpec = tween(200), label = "cardBg")
     val animatedBorder by animateColorAsState(targetBorderColor, animationSpec = tween(200), label = "cardBorder")
 
+    val resolvedIconName = when (iconText) {
+        in AppIconsMap -> iconText
+        "📖", "📚" -> "book"
+        "📄", "📝" -> "file"
+        else -> null
+    }
+
     Surface(
         modifier = modifier
             .height(46.dp)
             .shadow(
-                elevation = if (isSelected) 3.dp else 0.dp,
-                shape = RoundedCornerShape(12.dp)
+                elevation = if (isSelected) 2.dp else 0.dp,
+                shape = RoundedCornerShape(14.dp)
             )
-            .clip(RoundedCornerShape(12.dp))
+            .clip(RoundedCornerShape(14.dp))
             .clickable(onClick = onClick),
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(14.dp),
         color = animatedBg,
         border = BorderStroke(if (isSelected) 1.5.dp else 1.dp, animatedBorder)
     ) {
@@ -66,10 +74,18 @@ fun SelectableOptionCard(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
         ) {
-            Text(
-                text = iconText,
-                fontSize = 16.sp
-            )
+            if (resolvedIconName != null) {
+                StationeryIcon(
+                    name = resolvedIconName,
+                    size = 16.dp,
+                    tint = targetContentColor
+                )
+            } else {
+                Text(
+                    text = iconText,
+                    fontSize = 16.sp
+                )
+            }
             Spacer(modifier = Modifier.width(6.dp))
             Text(
                 text = label,
@@ -79,11 +95,10 @@ fun SelectableOptionCard(
             )
             if (isSelected) {
                 Spacer(modifier = Modifier.width(6.dp))
-                Icon(
-                    imageVector = Icons.Default.Check,
-                    contentDescription = "已选",
-                    tint = selectedContentColor,
-                    modifier = Modifier.size(16.dp)
+                StationeryIcon(
+                    name = "check",
+                    size = 15.dp,
+                    tint = selectedContentColor
                 )
             }
         }

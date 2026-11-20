@@ -1,0 +1,82 @@
+name: sproutmemo
+
+services:
+  db:
+    image: ${PG_IMAGE:-postgres:16-alpine}
+    container_name: sproutmemo-db
+    restart: unless-stopped
+    # 针对玩客云 1GB 内存精简 PostgreSQL 缓存与连接开销（常驻内存约 30MB）
+    command:
+      - "postgres"
+      - "-c"
+      - "shared_buffers=32MB"
+      - "-c"
+      - "max_connections=20"
+      - "-c"
+      - "work_mem=2MB"
+    environment:
+      POSTGRES_USER: sprout
+      POSTGRES_PASSWORD: sprout
+      POSTGRES_DB: sproutmemo
+      TZ: "Asia/Shanghai"
+    volumes:
+      - ${POSTGRES_DATA_DIR:-/mnt/usb/sproutmemo/backend/pgdata}:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sprout -d sproutmemo"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - sproutmemo_net
+
+  backend:
+    image: ${BACKEND_IMAGE:-crpi-tyyqcg8a2rpatesk.cn-shanghai.personal.cr.aliyuncs.com/zixidaxian/sproutmemo-backend:latest}
+    container_name: sproutmemo-backend
+    restart: unless-stopped
+    environment:
+      DEBUG: "False"
+      DATABASE_URL: postgresql+psycopg2://sprout:sprout@db:5432/sproutmemo
+      SECRET_KEY: ${SECRET_KEY:-sproutmemo-secured-secret-key-onecloud-2026}
+      DATA_DIR: /app/data
+      UPLOAD_DIR: /app/data/uploads
+      BACKUP_DIR: /app/data/backups
+      SNAPSHOT_DIR: /app/data/snapshots
+      LOG_DIR: /app/data/logs
+      HOST_IP: ${HOST_IP:-192.168.7.51}
+      HOST_PORT: ${HOST_PORT:-8080}
+      SERVICE_ADVERTISE_HOST: ${HOST_IP:-192.168.7.51}
+      SERVICE_ADVERTISE_PORT: ${HOST_PORT:-8080}
+      TZ: "Asia/Shanghai"
+    volumes:
+      - ${BACKEND_DATA_DIR:-/mnt/usb/sproutmemo/backend/data}:/app/data
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - sproutmemo_net
+      - sproutmemo_mdns
+
+  web:
+    image: ${WEB_IMAGE:-crpi-tyyqcg8a2rpatesk.cn-shanghai.personal.cr.aliyuncs.com/zixidaxian/sproutmemo-web:latest}
+    container_name: sproutmemo-web
+    restart: unless-stopped
+    ports:
+      - "${HOST_PORT:-8080}:80"
+    volumes:
+      - ${WEB_DATA_DIR:-/mnt/usb/sproutmemo/web}/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ${BACKEND_DATA_DIR:-/mnt/usb/sproutmemo/backend/data}/uploads:/usr/share/nginx/html/uploads:ro
+    depends_on:
+      - backend
+    networks:
+      - sproutmemo_net
+
+networks:
+  sproutmemo_net:
+    name: sproutmemo_net
+    driver: bridge
+  sproutmemo_mdns:
+    name: sproutmemo_mdns
+    driver: bridge
+    driver_opts:
+      com.docker.network.bridge.name: br-sproutmemo
+

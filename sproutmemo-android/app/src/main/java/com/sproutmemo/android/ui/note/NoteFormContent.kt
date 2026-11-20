@@ -26,7 +26,10 @@ import com.sproutmemo.android.media.AudioRecorder
 import com.sproutmemo.android.ui.components.GlassMediaButton
 import com.sproutmemo.android.ui.components.ImageEditDialog
 import com.sproutmemo.android.ui.components.MediaAttachmentPreviewGrid
+import com.sproutmemo.android.ui.components.StationeryCard
+import com.sproutmemo.android.ui.components.gridPaper
 import com.sproutmemo.android.ui.theme.LocalAppColors
+import com.sproutmemo.android.ui.theme.SproutTextScale
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
@@ -188,29 +191,28 @@ fun NoteFormContent(
 
     @Composable
     fun NoteInputAndMediaSection() {
-        Card(
-            shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = colors.cardBg),
+        StationeryCard(
             modifier = Modifier.fillMaxWidth()
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
-                Text("题目详情与笔记解析", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = colors.textPrimary)
-                Spacer(modifier = Modifier.height(8.dp))
+                Text("题目详情与笔记解析", fontSize = SproutTextScale.CardTitle, fontWeight = FontWeight.Bold, color = colors.textPrimary)
+                Spacer(modifier = Modifier.height(10.dp))
                 OutlinedTextField(
                     value = auxiliaryText,
                     onValueChange = { viewModel.auxiliaryText.value = it },
-                    placeholder = { Text("在此输入题目正文、考点分析或解题思路...", color = colors.textSecondary.copy(alpha = 0.5f)) },
+                    textStyle = LocalTextStyle.current.copy(fontSize = SproutTextScale.Body),
+                    placeholder = { Text("在此输入题目正文、考点分析或解题思路...", fontSize = SproutTextScale.Body, color = colors.textSecondary.copy(alpha = 0.5f)) },
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedTextColor = colors.textPrimary,
                         unfocusedTextColor = colors.textPrimary,
                         focusedBorderColor = colors.neonBlue,
-                        unfocusedBorderColor = colors.textSecondary.copy(alpha = 0.3f),
+                        unfocusedBorderColor = colors.rule,
                         focusedLabelColor = colors.neonBlue,
                         unfocusedLabelColor = colors.textSecondary
                     ),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(130.dp),
+                        .height(140.dp),
                     shape = RoundedCornerShape(12.dp)
                 )
 
@@ -233,7 +235,7 @@ fun NoteFormContent(
                 val audioCount = remember(localMediaItems) { localMediaItems.count { it.type == "audio" } }
                 val videoCount = remember(localMediaItems) { localMediaItems.count { it.type == "video" } }
 
-                Text("添加多媒体附件", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = colors.textSecondary)
+                Text("添加多媒体附件", fontSize = SproutTextScale.Label, fontWeight = FontWeight.Bold, color = colors.textSecondary)
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Column(
@@ -245,9 +247,9 @@ fun NoteFormContent(
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         GlassMediaButton(
-                            icon = "📷",
+                            icon = "image",
                             text = "相册图片 ($imageCount/9)",
-                            glowColor = Color(0xFF00E5FF),
+                            glowColor = colors.neonBlue,
                             textColor = colors.textPrimary,
                             secondaryColor = colors.textSecondary,
                             isLight = false,
@@ -256,9 +258,9 @@ fun NoteFormContent(
                             onClick = { imagePickerLauncher.launch("image/*") }
                         )
                         GlassMediaButton(
-                            icon = "📸",
+                            icon = "camera",
                             text = "实时拍照",
-                            glowColor = Color(0xFF00B0FF),
+                            glowColor = colors.neonBlue,
                             textColor = Color.White,
                             secondaryColor = colors.textSecondary,
                             isLight = true,
@@ -273,9 +275,9 @@ fun NoteFormContent(
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         GlassMediaButton(
-                            icon = "🎥",
+                            icon = "video",
                             text = "文件视频 ($videoCount/3)",
-                            glowColor = Color(0xFFD500F9),
+                            glowColor = colors.neonBlue,
                             textColor = colors.textPrimary,
                             secondaryColor = colors.textSecondary,
                             isLight = false,
@@ -284,9 +286,9 @@ fun NoteFormContent(
                             onClick = { videoPickerLauncher.launch("video/*") }
                         )
                         GlassMediaButton(
-                            icon = "📹",
+                            icon = "video",
                             text = "实时录像",
-                            glowColor = Color(0xFFE040FB),
+                            glowColor = colors.neonBlue,
                             textColor = Color.White,
                             secondaryColor = colors.textSecondary,
                             isLight = true,
@@ -301,9 +303,9 @@ fun NoteFormContent(
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         GlassMediaButton(
-                            icon = "📁",
+                            icon = "folder",
                             text = "导入音频 ($audioCount/6)",
-                            glowColor = Color(0xFF00E676),
+                            glowColor = colors.neonGreen,
                             textColor = colors.textPrimary,
                             secondaryColor = colors.textSecondary,
                             isLight = false,
@@ -312,9 +314,9 @@ fun NoteFormContent(
                             onClick = { audioPickerLauncher.launch("audio/*") }
                         )
                         val isRecordingText = if (isRecording) "停止录音" else "实时录音"
-                        val recGlowColor = if (isRecording) colors.neonRed else Color(0xFF00E676)
+                        val recGlowColor = if (isRecording) colors.neonRed else colors.neonGreen
                         GlassMediaButton(
-                            icon = if (isRecording) "⏹" else "🎤",
+                            icon = if (isRecording) "close" else "volume",
                             text = isRecordingText,
                             glowColor = recGlowColor,
                             textColor = if (isRecording) colors.neonRed else Color.White,
@@ -333,7 +335,7 @@ fun NoteFormContent(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(colors.darkBg)
+            .gridPaper(colors.darkBg, colors.rule)
             .padding(16.dp)
     ) {
         if (isTablet) {

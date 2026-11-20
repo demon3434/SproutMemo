@@ -17,6 +17,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.sproutmemo.android.ui.components.StationeryCard
+import com.sproutmemo.android.ui.components.StationeryIcon
+import com.sproutmemo.android.ui.components.gridPaper
 import com.sproutmemo.android.ui.theme.LocalAppColors
 
 @Composable
@@ -40,17 +43,19 @@ fun VideoQualitySettingsScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(colors.darkBg)
+            .gridPaper(colors.darkBg, colors.rule)
             .padding(16.dp)
             .verticalScroll(rememberScrollState())
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
+            StationeryIcon(name = "video", size = 20.dp, tint = colors.neonBlue)
             Text(
-                text = "🎬 视频上传压缩设置",
-                fontSize = 18.sp,
+                text = "视频上传压缩设置",
+                fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
                 color = colors.textPrimary
             )
@@ -60,17 +65,13 @@ fun VideoQualitySettingsScreen(
 
         qualities.forEach { (id, label) ->
             val isSelected = currentQuality == id
-            Card(
-                shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(containerColor = colors.cardBg),
+            StationeryCard(
+                borderColor = if (isSelected) colors.neonBlue else colors.rule,
+                edgeColor = if (isSelected) colors.neonBlue else colors.edge,
+                cornerRadius = 14.dp,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 6.dp)
-                    .border(
-                        width = if (isSelected) 2.dp else 1.dp,
-                        color = if (isSelected) colors.neonBlue else colors.textSecondary.copy(alpha = 0.2f),
-                        shape = RoundedCornerShape(12.dp)
-                    )
                     .clickable {
                         viewModel.selectVideoQuality(id)
                         Toast.makeText(context, "视频压缩品质已更新！", Toast.LENGTH_SHORT).show()

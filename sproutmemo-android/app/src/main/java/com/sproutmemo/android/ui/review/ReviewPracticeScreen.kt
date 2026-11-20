@@ -131,7 +131,7 @@ fun ReviewPracticeScreen(
     if (showAbandonDialog) {
         AlertDialog(
             onDismissRequest = { showAbandonDialog = false },
-            title = { Text("⚠️ 确定放弃本次复习吗？") },
+            title = { Text("确定放弃本次复习吗？") },
             text = { Text("放弃后，您在本次会话中的所有答题进度与打卡记录将不会保存。") },
             confirmButton = {
                 Button(
@@ -157,7 +157,7 @@ fun ReviewPracticeScreen(
     if (showSubmitDialog) {
         AlertDialog(
             onDismissRequest = { showSubmitDialog = false },
-            title = { Text("🏁 确定提交并结束复习吗？") },
+            title = { Text("确定提交并结束复习吗？") },
             text = { Text("本次复习共 ${session.target_count} 题，您已全部打卡完毕。点击确定后，成绩将同步到历史统计看板中。") },
             confirmButton = {
                 Button(

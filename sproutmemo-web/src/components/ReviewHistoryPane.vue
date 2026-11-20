@@ -3,7 +3,7 @@
     <!-- 左侧：历史会话列表 -->
     <div class="history-list-pane">
       <div class="pane-title-row">
-        <span class="pane-title-text">📋 往期复习任务</span>
+        <span class="pane-title-text" style="display:inline-flex; align-items:center; gap:6px;"><AppIcon name="list" :size="16" /> 往期复习任务</span>
         <div class="history-filters-bar">
           <!-- 自定义年月微调/选择器 -->
           <div class="month-selector-widget">
@@ -13,11 +13,12 @@
               @click="shiftMonth(-1)"
               title="前一个月"
             >
-              ◀
+              <AppIcon name="chevron-left" :size="14" />
             </button>
-            <div class="widget-current-text" @click.stop="toggleMonthPopup">
-              📅 {{ formatFilterYearMonth(historyFilterYearMonth) }}
-              <span class="widget-down-arrow">▼</span>
+            <div class="widget-current-text" @click.stop="toggleMonthPopup" style="display:inline-flex; align-items:center; gap:5px;">
+              <AppIcon name="calendar" :size="14" />
+              <span>{{ formatFilterYearMonth(historyFilterYearMonth) }}</span>
+              <AppIcon name="chevron-down" :size="13" />
             </div>
             <button 
               type="button"
@@ -26,7 +27,7 @@
               @click="shiftMonth(1)"
               title="后一个月"
             >
-              ▶
+              <AppIcon name="chevron-right" :size="14" />
             </button>
 
             <!-- 极简年月弹出网格面板 -->
@@ -54,12 +55,13 @@
             </div>
           </div>
           <!-- 学科筛选 -->
-          <select v-model="historyFilterSubject" class="history-filter-select" @change="resetAndReloadHistory">
-            <option value="">全部学科</option>
-            <option v-for="sub in subjects" :key="sub.subject_id" :value="sub.subject_id">
-              {{ sub.subject?.subject_name || sub.subject_name }}
-            </option>
-          </select>
+          <StationerySelect
+            v-model="historyFilterSubject"
+            :options="[{ value: '', label: '全部学科' }, ...(subjects || []).map(s => ({ value: s.subject_id, label: s.subject?.subject_name || s.subject_name }))]"
+            compact
+            style="width: 140px;"
+            @change="resetAndReloadHistory"
+          />
         </div>
       </div>
       <div v-if="historyList.length === 0" class="history-empty">
@@ -82,11 +84,11 @@
               </span>
             </div>
             <div class="row-meta">
-              <span>📚 {{ h.semester_name }}</span>
+              <span style="display:inline-flex; align-items:center; gap:4px;"><AppIcon name="book" :size="13" /> {{ h.semester_name }}</span>
               <span>学科: {{ h.subject_name }}</span>
             </div>
             <div class="row-footer">
-              <span>🎯 策略: {{ h.strategy_name }}</span>
+              <span style="display:inline-flex; align-items:center; gap:4px;"><AppIcon name="target" :size="13" /> 策略: {{ h.strategy_name }}</span>
               <span>进度: {{ h.completed_count }}/{{ h.target_count }} 题</span>
             </div>
           </div>
@@ -100,7 +102,7 @@
             :disabled="loadingHistory"
             @click="loadMoreHistory"
           >
-            {{ loadingHistory ? '⏳ 加载中...' : '点击加载更多' }}
+            {{ loadingHistory ? '加载中...' : '点击加载更多' }}
           </button>
           <div v-else class="no-more-history-tip">
             — 已显示全部复习历史记录 —
@@ -112,7 +114,7 @@
     <!-- 右侧：选中会话的题目明细 -->
     <div class="history-detail-pane">
       <div class="pane-title">
-        <span>🔍 复习题目明细</span>
+        <span style="display:inline-flex; align-items:center; gap:6px;"><AppIcon name="search" :size="16" /> 复习题目明细</span>
         <span v-if="selectedHistoryDetail" class="pane-title-sub">
           （复习时间：{{ formatDate(selectedHistoryDetail.created_at) }} | 题量：{{ selectedHistoryDetail.target_count }} 题）
         </span>
@@ -157,6 +159,8 @@
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import { reviewService } from '../services/reviewService.js';
+import StationerySelect from './StationerySelect.vue';
+import AppIcon from './AppIcon.vue';
 
 const props = defineProps({
   subjects: Array,
@@ -385,501 +389,4 @@ onUnmounted(() => {
 });
 </script>
 
-<style scoped>
-.history-container {
-  display: flex;
-  height: 100%;
-  background: var(--bg-main);
-  width: 100%;
-}
-
-.history-list-pane {
-  width: 340px;
-  border-right: 1px solid var(--border);
-  background: var(--bg-card);
-  display: flex;
-  flex-direction: column;
-  flex-shrink: 0;
-}
-
-.pane-title-row {
-  padding: 16px 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  border-bottom: 1px solid var(--border);
-  background: var(--bg-card);
-}
-
-.pane-title-text {
-  font-size: 14.5px;
-  font-weight: 800;
-  color: var(--text-main);
-}
-
-.history-filters-bar {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  width: 100%;
-}
-
-.history-filter-select {
-  flex: 1;
-  height: 32px;
-  padding: 0 8px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  background: var(--bg-card);
-  color: var(--text-main);
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.month-selector-widget {
-  position: relative;
-  display: flex;
-  align-items: center;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  background: var(--bg-card);
-  overflow: visible;
-  height: 32px;
-  flex: 1.2;
-}
-
-.widget-arrow-btn {
-  width: 24px;
-  height: 100%;
-  border: none;
-  background: transparent;
-  color: var(--text-muted);
-  font-size: 9px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: var(--transition);
-}
-
-.widget-arrow-btn:hover:not(:disabled) {
-  background: var(--bg-main);
-  color: var(--primary);
-}
-
-.widget-arrow-btn:disabled {
-  color: var(--border);
-  cursor: not-allowed;
-}
-
-.widget-current-text {
-  flex: 1;
-  padding: 0 6px;
-  height: 100%;
-  font-size: 11.5px;
-  font-weight: 700;
-  color: var(--text-main);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  border-left: 1px solid var(--border);
-  border-right: 1px solid var(--border);
-  user-select: none;
-  white-space: nowrap;
-}
-
-.widget-current-text:hover {
-  background: var(--bg-main);
-}
-
-.widget-down-arrow {
-  font-size: 8px;
-  color: var(--text-muted);
-}
-
-.month-grid-popup {
-  position: absolute;
-  top: 36px;
-  left: 0;
-  width: 220px;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-lg);
-  padding: 12px;
-  z-index: 120;
-  animation: widgetFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.popup-year-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
-  border-bottom: 1px solid var(--border);
-  padding-bottom: 6px;
-}
-
-.year-arrow {
-  width: 22px;
-  height: 22px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-xs);
-  background: var(--bg-main);
-  color: var(--text-main);
-  font-size: 9px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.year-arrow:hover:not(:disabled) {
-  border-color: var(--primary);
-  color: var(--primary);
-}
-
-.year-arrow:disabled {
-  color: var(--border);
-  cursor: not-allowed;
-}
-
-.year-text {
-  font-size: 12.5px;
-  font-weight: 700;
-  color: var(--text-main);
-}
-
-.popup-months-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 6px;
-}
-
-.month-grid-item {
-  height: 28px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-xs);
-  background: var(--bg-main);
-  color: var(--text-main);
-  font-size: 11px;
-  font-weight: 600;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: var(--transition);
-}
-
-.month-grid-item:hover:not(.disabled):not(.active) {
-  border-color: var(--primary);
-  color: var(--primary);
-  background: var(--bg-card);
-}
-
-.month-grid-item.active {
-  background: var(--primary);
-  color: #ffffff;
-  border-color: var(--primary);
-}
-
-.month-grid-item.disabled {
-  background: var(--bg-main);
-  color: var(--border);
-  border-color: var(--border);
-  cursor: not-allowed;
-  opacity: 0.6;
-}
-
-.history-empty, .detail-empty {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex: 1;
-  color: var(--text-muted);
-  font-size: 13px;
-  padding: 20px;
-}
-
-.history-items {
-  flex: 1;
-  overflow-y: auto;
-  padding: 16px;
-}
-
-.history-month-group {
-  margin-bottom: 24px;
-}
-
-.month-group-title {
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--text-muted);
-  margin-bottom: 12px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding-left: 6px;
-  border-left: 3px solid var(--primary);
-}
-
-.history-row-card {
-  padding: 14px 16px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  background: var(--bg-card);
-  margin-bottom: 12px;
-  cursor: pointer;
-  transition: var(--transition);
-  box-shadow: var(--shadow-sm);
-}
-
-.history-row-card:hover {
-  border-color: var(--primary);
-  box-shadow: var(--shadow-md);
-  transform: translateY(-1px);
-}
-
-.history-row-card.selected {
-  border-color: var(--primary);
-  background: var(--bg-card);
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.08);
-  position: relative;
-}
-
-.history-row-card.selected::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 4px;
-  background: var(--primary);
-  border-top-left-radius: var(--radius-md);
-  border-bottom-left-radius: var(--radius-md);
-}
-
-.row-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 6px;
-}
-
-.row-date {
-  font-size: 11px;
-  color: var(--text-muted);
-  font-weight: 500;
-}
-
-.row-status {
-  font-size: 10.5px;
-  font-weight: 700;
-  padding: 2px 8px;
-  border-radius: 12px;
-}
-
-.row-status.completed {
-  background: #e6f4ea;
-  color: #137333;
-}
-
-.row-status.abandoned {
-  background: #fce8e6;
-  color: #c5221f;
-}
-
-.row-meta {
-  font-size: 12.5px;
-  color: var(--text-main);
-  font-weight: 700;
-  margin-bottom: 6px;
-  display: flex;
-  gap: 8px;
-}
-
-.row-footer {
-  font-size: 11.5px;
-  color: var(--text-muted);
-  display: flex;
-  justify-content: space-between;
-}
-
-.history-pagination-ctrl {
-  margin-top: 16px;
-  display: flex;
-  justify-content: center;
-}
-
-.btn-load-more {
-  width: 100%;
-  height: 34px;
-  border: 1px solid var(--border);
-  background: var(--bg-card);
-  border-radius: var(--radius-sm);
-  color: var(--text-main);
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: var(--transition);
-}
-
-.btn-load-more:hover {
-  background: var(--bg-main);
-  border-color: var(--primary);
-  color: var(--primary);
-}
-
-.no-more-history-tip {
-  font-size: 11px;
-  color: var(--text-muted);
-  margin: 10px 0;
-}
-
-/* 详情分栏 */
-.history-detail-pane {
-  flex: 1;
-  background: var(--bg-card);
-  display: flex;
-  flex-direction: column;
-}
-
-.pane-title {
-  padding: 18px 24px;
-  font-size: 14px;
-  font-weight: 700;
-  border-bottom: 1px solid var(--border);
-  color: var(--text-main);
-  background: var(--bg-card);
-  display: flex;
-  align-items: center;
-}
-
-.pane-title-sub {
-  font-size: 12px;
-  font-weight: normal;
-  color: var(--text-muted);
-  margin-left: 8px;
-}
-
-.detail-content {
-  flex: 1;
-  overflow-y: auto;
-  padding: 24px;
-  background: var(--bg-main);
-}
-
-.detail-meta-summary {
-  margin-bottom: 20px;
-  background: var(--bg-card);
-  padding: 16px 20px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-sm);
-}
-
-.detail-meta-summary h3 {
-  font-size: 15px;
-  color: var(--text-main);
-  margin-bottom: 6px;
-  font-weight: 700;
-}
-
-.detail-meta-summary p {
-  font-size: 12px;
-  color: var(--text-muted);
-}
-
-.detail-questions-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.detail-question-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 14px 20px;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  transition: var(--transition);
-  box-shadow: var(--shadow-sm);
-}
-
-.detail-question-item:hover {
-  border-color: var(--primary);
-  box-shadow: var(--shadow-md);
-  transform: translateY(-1px);
-}
-
-.item-left {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.item-idx {
-  font-weight: 700;
-  color: var(--text-muted);
-  font-size: 14px;
-  width: 16px;
-}
-
-.item-info {
-  display: flex;
-  flex-direction: column;
-}
-
-.item-title {
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--text-main);
-}
-
-.item-desc {
-  font-size: 11px;
-  color: var(--text-muted);
-  margin-top: 2px;
-}
-
-.item-right {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.item-duration {
-  font-size: 11px;
-  color: var(--text-muted);
-  font-weight: 500;
-}
-
-.outcome-pill {
-  font-size: 10.5px;
-  padding: 2.5px 10px;
-  border-radius: 12px;
-  font-weight: 700;
-  white-space: nowrap;
-}
-
-.outcome-pill.uncompleted {
-  background: #f1f5f9;
-  color: #475569;
-}
-
-@keyframes widgetFadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-</style>
+<style scoped src='./ReviewHistoryPane.css'></style>

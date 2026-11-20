@@ -8,6 +8,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.sproutmemo.android.ui.components.StationeryCard
 import com.sproutmemo.android.ui.theme.LocalAppColors
 
 @Composable
@@ -33,10 +34,8 @@ fun NoteListFilterCard(
     val subjects by viewModel.subjects.collectAsState()
     val units by viewModel.systemUnits.collectAsState()
 
-    Card(
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = colors.cardBg),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+    StationeryCard(
+        cornerRadius = 14.dp,
         modifier = Modifier.fillMaxWidth()
     ) {
         Column(modifier = Modifier.padding(12.dp)) {
@@ -132,9 +131,9 @@ fun NoteListFilterCard(
                         selectedValue = selectedMastery,
                         options = listOf(
                             Pair("", "全部"),
-                            Pair("CLUELESS", "🔴 完全不会"),
-                            Pair("PARTIAL", "🟡 一知半解"),
-                            Pair("MASTERED", "🟢 熟练掌握")
+                            Pair("CLUELESS", "完全不会"),
+                            Pair("PARTIAL", "一知半解"),
+                            Pair("MASTERED", "熟练掌握")
                         ),
                         onSelected = { viewModel.selectedMastery.value = it }
                     )
@@ -146,8 +145,8 @@ fun NoteListFilterCard(
                 selectedValue = sourceType,
                 options = listOf(
                     Pair("", "全部"),
-                    Pair("BOOK", "📖 习题册"),
-                    Pair("PAPER", "📄 试卷/其它")
+                    Pair("BOOK", "习题册"),
+                    Pair("PAPER", "试卷/其它")
                 ),
                 onSelected = { viewModel.sourceType.value = it }
             )
@@ -163,7 +162,7 @@ fun NoteListFilterCard(
                     shape = RoundedCornerShape(8.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = colors.neonBlue)
                 ) {
-                    Text("应用筛选", fontSize = 12.sp, color = Color.White)
+                    Text("应用筛选", fontSize = 13.5.sp, color = Color.White)
                 }
                 OutlinedButton(
                     onClick = {
@@ -185,7 +184,7 @@ fun NoteListFilterCard(
                     shape = RoundedCornerShape(8.dp),
                     colors = ButtonDefaults.outlinedButtonColors(contentColor = colors.textPrimary)
                 ) {
-                    Text("重置", fontSize = 12.sp)
+                    Text("重置", fontSize = 13.5.sp)
                 }
             }
         }

@@ -24,6 +24,11 @@ import coil.compose.AsyncImage
 import com.sproutmemo.android.data.remote.ApiClient
 import com.sproutmemo.android.data.remote.model.NoteDto
 import com.sproutmemo.android.ui.components.NoteImageLightboxDialog
+import com.sproutmemo.android.ui.components.StarRatingStickerBar
+import com.sproutmemo.android.ui.components.StationeryCard
+import com.sproutmemo.android.ui.components.StationeryIcon
+import com.sproutmemo.android.ui.components.StationeryLinedNoteBox
+import com.sproutmemo.android.ui.components.gridPaper
 import com.sproutmemo.android.ui.note.AudioPlayerWidget
 import com.sproutmemo.android.ui.note.VideoPlayerWidget
 import com.sproutmemo.android.ui.note.ImageAttachmentsSection
@@ -79,7 +84,7 @@ fun NotePreviewScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(colors.darkBg)
+                .gridPaper(colors.darkBg, colors.rule)
                 .padding(innerPadding)
         ) {
             if (loading) {
@@ -126,10 +131,8 @@ fun NotePreviewScreen(
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     // Header Card
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(containerColor = colors.cardBg),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+                    StationeryCard(
+                        modifier = Modifier.fillMaxWidth()
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
                             Text(
@@ -154,10 +157,8 @@ fun NotePreviewScreen(
                     }
 
                     // Attributes Card (Difficulty, Mastery, Review Pool status)
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(containerColor = colors.cardBg),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+                    StationeryCard(
+                        modifier = Modifier.fillMaxWidth()
                     ) {
                         Column(
                             modifier = Modifier.padding(16.dp),
@@ -172,15 +173,11 @@ fun NotePreviewScreen(
                                     color = colors.neonBlue,
                                     modifier = Modifier.width(80.dp)
                                 )
-                                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                                    (1..5).forEach { star ->
-                                        Text(
-                                            text = if (star <= currentNote.difficulty_stars) "★" else "☆",
-                                            fontSize = 20.sp,
-                                            color = if (star <= currentNote.difficulty_stars) Color(0xFFF59E0B) else colors.textSecondary.copy(alpha = 0.4f)
-                                        )
-                                    }
-                                }
+                                StarRatingStickerBar(
+                                    stars = currentNote.difficulty_stars.toInt(),
+                                    onStarsChange = null,
+                                    starSize = 20.dp
+                                )
                             }
 
                             // Mastery Level
@@ -192,16 +189,19 @@ fun NotePreviewScreen(
                                     color = colors.neonBlue,
                                     modifier = Modifier.width(80.dp)
                                 )
-                                val masteryLabel = when (currentNote.mastery_level) {
-                                    "CLUELESS" -> "🔴 完全不会"
-                                    "PARTIAL" -> "🟡 一知半解"
-                                    else -> "🟢 熟练掌握"
+                                val (masteryIcon, masteryLabel, masteryColor) = when (currentNote.mastery_level) {
+                                    "CLUELESS" -> Triple("mastery-clueless", "完全不会", colors.neonRed)
+                                    "PARTIAL" -> Triple("mastery-partial", "一知半解", colors.neonAmber)
+                                    else -> Triple("mastery-mastered", "熟练掌握", colors.neonGreen)
                                 }
-                                Box(
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp),
                                     modifier = Modifier
-                                        .background(colors.darkBg, shape = RoundedCornerShape(6.dp))
+                                        .background(colors.paper2, shape = RoundedCornerShape(8.dp))
                                         .padding(horizontal = 10.dp, vertical = 4.dp)
                                 ) {
+                                    StationeryIcon(name = masteryIcon, size = 14.dp, tint = masteryColor)
                                     Text(
                                         text = masteryLabel,
                                         fontSize = 13.sp,
@@ -237,25 +237,22 @@ fun NotePreviewScreen(
                     }
 
                     // Auxiliary Text Card
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(containerColor = colors.cardBg),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+                    StationeryCard(
+                        modifier = Modifier.fillMaxWidth()
                     ) {
-                        Column(modifier = Modifier.padding(16.dp)) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp)
+                        ) {
                             Text(
                                 text = "题目与解析",
-                                fontSize = 14.sp,
+                                fontSize = 14.5.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = colors.neonBlue
                             )
                             Spacer(modifier = Modifier.height(8.dp))
-                            Text(
-                                text = currentNote.auxiliary_text ?: "(暂无文字描述)",
-                                fontSize = 14.sp,
-                                color = if (currentNote.auxiliary_text.isNullOrBlank()) colors.textSecondary else colors.textPrimary,
-                                lineHeight = 22.sp
-                            )
+                            StationeryLinedNoteBox(text = currentNote.auxiliary_text)
                         }
                     }
 
@@ -326,7 +323,7 @@ private fun DetailSection(
     content: @Composable ColumnScope.() -> Unit
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        Text(title, fontSize = 12.sp, fontWeight = FontWeight.Bold, color = titleColor)
+        Text(title, fontSize = 13.5.sp, fontWeight = FontWeight.Bold, color = titleColor)
         content()
     }
 }

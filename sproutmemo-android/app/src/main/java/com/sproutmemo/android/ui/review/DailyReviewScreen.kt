@@ -15,12 +15,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sproutmemo.android.ui.components.RecentStatsTable
 import com.sproutmemo.android.ui.components.ReviewPresetsStatsCard
+import com.sproutmemo.android.ui.components.StationeryCard
+import com.sproutmemo.android.ui.components.StationeryIcon
+import com.sproutmemo.android.ui.components.gridPaper
+import com.sproutmemo.android.ui.theme.LocalAppColors
 
 @Composable
 fun DailyReviewScreen(
     viewModel: ReviewViewModel,
     userRole: String
 ) {
+    val colors = LocalAppColors.current
     val presetsData by viewModel.presetsData.collectAsState()
     val recentStats by viewModel.recentStats.collectAsState()
     val boundChildren by viewModel.boundChildren.collectAsState()
@@ -38,10 +43,16 @@ fun DailyReviewScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFF8FAFC))
+            .gridPaper(colors.darkBg, colors.rule)
             .padding(16.dp)
     ) {
-        Text("📊 复习总览仪表盘", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1E293B))
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            StationeryIcon(name = "chart", size = 22.dp, tint = colors.neonBlue)
+            Text("复习总览仪表盘", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = colors.textPrimary)
+        }
         Spacer(modifier = Modifier.height(12.dp))
 
         if (isParent) {
@@ -57,31 +68,30 @@ fun DailyReviewScreen(
                     val activeChild = boundChildren.find { it.id == selectedChildId }
                     val childDisplayName = activeChild?.nickname ?: activeChild?.username ?: "选择孩子账号"
 
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(containerColor = Color.White),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+                    StationeryCard(
+                        modifier = Modifier.fillMaxWidth()
                     ) {
                         Row(
                             modifier = Modifier.padding(12.dp).fillMaxWidth(),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Text("选择学生账号:", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color(0xFF475569))
+                            Text("选择学生账号:", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = colors.textSecondary)
                             Box {
                                 OutlinedButton(
                                     onClick = { childSelectorExpanded = true },
-                                    shape = RoundedCornerShape(8.dp)
+                                    shape = RoundedCornerShape(10.dp)
                                 ) {
-                                    Text(childDisplayName, color = Color(0xFF4F46E5), fontWeight = FontWeight.Bold)
+                                    Text(childDisplayName, color = colors.neonBlue, fontWeight = FontWeight.Bold)
                                 }
                                 DropdownMenu(
                                     expanded = childSelectorExpanded,
-                                    onDismissRequest = { childSelectorExpanded = false }
+                                    onDismissRequest = { childSelectorExpanded = false },
+                                    modifier = Modifier.background(colors.cardBg)
                                 ) {
                                     boundChildren.forEach { child ->
                                         DropdownMenuItem(
-                                            text = { Text(child.nickname ?: child.username) },
+                                            text = { Text(child.nickname ?: child.username, color = colors.textPrimary) },
                                             onClick = {
                                                 viewModel.onChildSelected(child.id)
                                                 childSelectorExpanded = false
@@ -103,7 +113,7 @@ fun DailyReviewScreen(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
-                Text("此面板仅家长端账号可见，学生账号请使用“抽题复习”。", color = Color(0xFF64748B), fontSize = 14.sp)
+                Text("此面板仅家长端账号可见，学生账号请使用“抽题复习”。", color = colors.textSecondary, fontSize = 14.sp)
             }
         }
     }

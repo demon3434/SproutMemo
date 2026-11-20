@@ -8,10 +8,10 @@
     <button class="preview-close-btn" @click="handleClose">×</button>
 
     <div class="preview-zoom-controls" @click.stop>
-      <button class="zoom-btn" @click="zoomOut" title="缩小">➖</button>
+      <button class="zoom-btn" @click="zoomOut" title="缩小"><AppIcon name="minus" :size="15" /></button>
       <span class="zoom-text">{{ Math.round(zoomScale * 100) }}%</span>
-      <button class="zoom-btn" @click="zoomIn" title="放大">➕</button>
-      <button class="zoom-btn" @click="resetZoom" title="重置">🔍</button>
+      <button class="zoom-btn" @click="zoomIn" title="放大"><AppIcon name="plus" :size="15" /></button>
+      <button class="zoom-btn" @click="resetZoom" title="重置"><AppIcon name="search" :size="15" /></button>
       <span class="control-divider">|</span>
       <button class="zoom-btn rotate-btn" type="button" @click="handleRotateLeft" title="左旋转 90°">
         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
@@ -60,6 +60,7 @@
 
 <script setup>
 import { ref, watch, onUnmounted } from 'vue';
+import AppIcon from './AppIcon.vue';
 
 const props = defineProps({
   visible: { type: Boolean, required: true },

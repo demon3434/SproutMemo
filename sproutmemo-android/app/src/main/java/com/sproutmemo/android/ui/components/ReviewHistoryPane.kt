@@ -103,7 +103,7 @@ private fun ReviewHistoryItem(
                         ) {
                             Text(
                                 text = statusName,
-                                fontSize = 10.sp,
+                                fontSize = 13.5.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = statusColor
                             )
@@ -119,7 +119,7 @@ private fun ReviewHistoryItem(
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = "📅 $formattedDate · 策略: $strategyName",
-                        fontSize = 11.sp,
+                        fontSize = 13.sp,
                         color = Color(0xFF64748B)
                     )
                 }
@@ -143,7 +143,7 @@ private fun ReviewHistoryItem(
                     
                     Text(
                         text = "错题详情列表:",
-                        fontSize = 12.sp,
+                        fontSize = 13.5.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color(0xFF475569),
                         modifier = Modifier.padding(bottom = 6.dp)
@@ -152,7 +152,7 @@ private fun ReviewHistoryItem(
                     if (session.notes.orEmpty().isEmpty()) {
                         Text(
                             text = "无错题快照数据",
-                            fontSize = 11.sp,
+                            fontSize = 13.sp,
                             color = Color(0xFF94A3B8),
                             modifier = Modifier.padding(vertical = 4.dp)
                         )
@@ -166,20 +166,20 @@ private fun ReviewHistoryItem(
                             ) {
                                 Text(
                                     text = "${idx + 1}.",
-                                    fontSize = 12.sp,
+                                    fontSize = 13.5.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = Color(0xFF64748B),
                                     modifier = Modifier.width(20.dp)
                                 )
                                 Text(
                                     text = "${note.subject_name ?: ""} · ${note.source_paper_name ?: note.question_source_name ?: "错题"}",
-                                    fontSize = 12.sp,
+                                    fontSize = 13.5.sp,
                                     color = Color(0xFF334155),
                                     modifier = Modifier.weight(1f)
                                 )
                                 Text(
                                     text = "⭐ ${note.difficulty_stars}",
-                                    fontSize = 11.sp,
+                                    fontSize = 13.sp,
                                     color = Color(0xFFF59E0B),
                                     fontWeight = FontWeight.Bold
                                 )

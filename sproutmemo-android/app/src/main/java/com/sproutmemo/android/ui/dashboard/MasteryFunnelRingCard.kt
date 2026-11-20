@@ -12,6 +12,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sproutmemo.android.data.remote.model.StatsOverviewDto
+import com.sproutmemo.android.ui.components.StationeryCard
+import com.sproutmemo.android.ui.components.StationeryIcon
 import com.sproutmemo.android.ui.theme.LocalAppColors
 
 @Composable
@@ -26,22 +28,25 @@ fun MasteryFunnelRingCard(stats: StatsOverviewDto?) {
     val partialPct = Math.round((partial.toFloat() / total) * 100)
     val masteredPct = Math.round((mastered.toFloat() / total) * 100)
 
-    Card(
+    StationeryCard(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 6.dp),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = colors.cardBg),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            .padding(vertical = 6.dp)
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
-            Text(
-                text = "🎯 掌握程度占比",
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold,
-                color = colors.textPrimary,
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.padding(bottom = 16.dp)
-            )
+            ) {
+                StationeryIcon(name = "target", size = 18.dp, tint = colors.neonBlue)
+                Text(
+                    text = "掌握程度占比",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = colors.textPrimary
+                )
+            }
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -51,7 +56,7 @@ fun MasteryFunnelRingCard(stats: StatsOverviewDto?) {
                     label = "完全不会",
                     count = clueless,
                     percentage = "$cluelessPct%",
-                    color = Color(0xFFEF4444),
+                    color = colors.neonRed,
                     progress = clueless.toFloat() / total
                 )
 
@@ -59,7 +64,7 @@ fun MasteryFunnelRingCard(stats: StatsOverviewDto?) {
                     label = "一知半解",
                     count = partial,
                     percentage = "$partialPct%",
-                    color = Color(0xFFF59E0B),
+                    color = colors.neonAmber,
                     progress = partial.toFloat() / total
                 )
 
@@ -67,7 +72,7 @@ fun MasteryFunnelRingCard(stats: StatsOverviewDto?) {
                     label = "熟练掌握",
                     count = mastered,
                     percentage = "$masteredPct%",
-                    color = Color(0xFF10B981),
+                    color = colors.neonGreen,
                     progress = mastered.toFloat() / total
                 )
             }
@@ -98,13 +103,13 @@ private fun MasteryRingItem(
             )
             Text(
                 text = percentage,
-                fontSize = 12.sp,
+                fontSize = 13.5.sp,
                 fontWeight = FontWeight.Bold,
                 color = colors.textPrimary
             )
         }
         Spacer(modifier = Modifier.height(6.dp))
         Text(text = "$count 题", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = colors.textPrimary)
-        Text(text = label, fontSize = 11.sp, color = colors.textSecondary)
+        Text(text = label, fontSize = 13.sp, color = colors.textSecondary)
     }
 }

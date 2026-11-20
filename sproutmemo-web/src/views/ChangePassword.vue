@@ -1,7 +1,7 @@
 <template>
   <div class="password-container" style="max-width: 500px; margin: 0 auto;">
     <div class="card">
-      <h3 class="card-title">🔐 修改登录密码</h3>
+      <h3 class="card-title">修改登录密码</h3>
       <p class="card-subtitle">为了您的账户安全，建议定期更换高强度的密码。</p>
 
       <form @submit.prevent="handleSavePassword">

@@ -7,7 +7,7 @@
         打包当前数据库的所有 SQL 语句以及多媒体文件（图片、音频、视频）并导出为未压缩的 tar 文件。
       </p>
       <button @click="handleDownloadBackup" class="btn btn-primary" style="width: auto;">
-        💾 开始导出备份
+        开始导出备份
       </button>
     </div>
 

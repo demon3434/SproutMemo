@@ -5,7 +5,7 @@
     <div style="background-color: var(--bg-card); padding: 16px 24px; border-radius: var(--radius-md); border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
       <div style="display: flex; gap: 12px; align-items: center;">
         <button @click="handleCreateStage" class="btn btn-primary" style="width: auto;">
-          ➕ 新建学习阶段
+          新建学习阶段
         </button>
       </div>
 
@@ -54,11 +54,11 @@
           <div style="display: flex; gap: 4px;">
             <button @click="handleMoveStage(stage, 'up')" class="btn-arrow" title="左移" :disabled="stageIdx === 0">◀</button>
             <button @click="handleMoveStage(stage, 'down')" class="btn-arrow" title="右移" :disabled="stageIdx === stagesList.length - 1">▶</button>
-            <button @click="handleEditStage(stage)" class="btn-icon" title="重命名" style="padding: 2px 6px;">✏️</button>
+            <button @click="handleEditStage(stage)" class="btn-icon" title="重命名" style="padding: 2px 6px;">编辑</button>
             <button @click="handleToggleStage(stage)" class="btn-icon" :title="stage.is_active ? '停用' : '启用'" style="padding: 2px 6px;">
-              {{ stage.is_active ? '🚫' : '✅' }}
+              {{ stage.is_active ? '停用' : '启用' }}
             </button>
-            <button @click="handleDeleteStage(stage)" class="btn-icon" title="删除" style="padding: 2px 6px;">🗑️</button>
+            <button @click="handleDeleteStage(stage)" class="btn-icon" title="删除" style="padding: 2px 6px;">删除</button>
           </div>
         </div>
 
@@ -82,11 +82,11 @@
             <div style="display: flex; gap: 4px; flex-shrink: 0;">
               <button @click="handleMoveSemester(sem, 'up')" class="btn-arrow-sm" title="上移" :disabled="semIdx === 0">▲</button>
               <button @click="handleMoveSemester(sem, 'down')" class="btn-arrow-sm" title="下移" :disabled="semIdx === getSemestersByStage(stage.id).length - 1">▼</button>
-              <button @click="handleEditSemester(sem)" class="btn-icon-sub" title="重命名">✏️</button>
+              <button @click="handleEditSemester(sem)" class="btn-icon-sub" title="重命名">编辑</button>
               <button @click="handleToggleSemester(sem)" class="btn-icon-sub" :title="sem.is_active ? '停用' : '启用'">
-                {{ sem.is_active ? '🚫' : '✅' }}
+                {{ sem.is_active ? '停用' : '启用' }}
               </button>
-              <button @click="handleDeleteSemester(sem)" class="btn-icon-sub" title="删除">🗑️</button>
+              <button @click="handleDeleteSemester(sem)" class="btn-icon-sub" title="删除">删除</button>
             </div>
           </div>
         </div>

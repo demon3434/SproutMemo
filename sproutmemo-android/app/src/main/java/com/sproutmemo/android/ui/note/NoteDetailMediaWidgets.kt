@@ -32,6 +32,7 @@ import androidx.media3.ui.PlayerView
 import coil.compose.AsyncImage
 import com.sproutmemo.android.data.remote.model.AttachmentDto
 import com.sproutmemo.android.ui.components.NoteAttachmentRotator
+import com.sproutmemo.android.ui.components.StationeryIcon
 import com.sproutmemo.android.ui.theme.LocalAppColors
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -76,17 +77,17 @@ fun AudioPlayerWidget(url: String, title: String?, fileSize: Long) {
     ) {
         Column(modifier = Modifier.padding(12.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("🎵", fontSize = 20.sp)
+                StationeryIcon(name = "music", size = 20.dp, tint = colors.neonBlue)
                 Spacer(Modifier.width(8.dp))
                 Column(Modifier.weight(1f)) {
                     Text(
                         title?.takeIf { it.isNotBlank() } ?: "音频附件",
-                        fontSize = 13.sp,
+                        fontSize = 14.5.sp,
                         fontWeight = FontWeight.SemiBold,
                         color = colors.textPrimary,
                         maxLines = 1
                     )
-                    Text(formatFileSize(fileSize), fontSize = 11.sp, color = colors.textSecondary)
+                    Text(formatFileSize(fileSize), fontSize = 12.5.sp, color = colors.textSecondary)
                 }
                 IconButton(onClick = {
                     if (isPlaying) {
@@ -119,8 +120,8 @@ fun AudioPlayerWidget(url: String, title: String?, fileSize: Long) {
                     modifier = Modifier.fillMaxWidth().height(24.dp)
                 )
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    Text(formatSeconds(currentMs / 1000), fontSize = 10.sp, color = colors.textSecondary)
-                    Text(formatSeconds(durationMs / 1000), fontSize = 10.sp, color = colors.textSecondary)
+                    Text(formatSeconds(currentMs / 1000), fontSize = 13.5.sp, color = colors.textSecondary)
+                    Text(formatSeconds(durationMs / 1000), fontSize = 13.5.sp, color = colors.textSecondary)
                 }
             }
         }
@@ -195,22 +196,22 @@ fun VideoPlayerWidget(url: String, title: String?, fileSize: Long) {
                         contentScale = ContentScale.Crop
                     )
                 } else {
-                    Text("🎬", fontSize = 28.sp)
+                    StationeryIcon(name = "video", size = 28.dp, tint = colors.neonBlue)
                 }
             }
             Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f)) {
                 Text(
                     title?.takeIf { it.isNotBlank() } ?: "视频附件",
-                    fontSize = 13.sp,
+                    fontSize = 14.5.sp,
                     fontWeight = FontWeight.SemiBold,
                     color = colors.textPrimary,
                     maxLines = 2
                 )
                 Spacer(Modifier.height(2.dp))
-                Text(formatFileSize(fileSize), fontSize = 11.sp, color = colors.textSecondary)
+                Text(formatFileSize(fileSize), fontSize = 12.5.sp, color = colors.textSecondary)
             }
-            Text("▶ 播放", fontSize = 12.sp, color = colors.neonBlue)
+            Text("播放", fontSize = 13.5.sp, fontWeight = FontWeight.Bold, color = colors.neonBlue)
         }
     }
 
@@ -338,8 +339,8 @@ fun VideoPlayerWidget(url: String, title: String?, fileSize: Long) {
                             Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Text(formatSeconds((currentMs / 1000).toInt()), fontSize = 10.sp, color = Color.White)
-                            Text(formatSeconds((durationMs / 1000).toInt()), fontSize = 10.sp, color = Color.White)
+                            Text(formatSeconds((currentMs / 1000).toInt()), fontSize = 13.5.sp, color = Color.White)
+                            Text(formatSeconds((durationMs / 1000).toInt()), fontSize = 13.5.sp, color = Color.White)
                         }
                     }
                     Row(
@@ -408,15 +409,15 @@ fun ImageAttachmentsSection(
             Column(Modifier.weight(1f)) {
                 Text(
                     attach.title?.takeIf { it.isNotBlank() } ?: attach.original_name ?: "图片附件",
-                    fontSize = 13.sp,
+                    fontSize = 14.5.sp,
                     fontWeight = FontWeight.SemiBold,
                     color = colors.textPrimary,
                     maxLines = 2
                 )
                 Spacer(Modifier.height(2.dp))
-                Text(formatFileSize(attach.file_size), fontSize = 11.sp, color = colors.textSecondary)
+                Text(formatFileSize(attach.file_size), fontSize = 12.5.sp, color = colors.textSecondary)
             }
-            Text("🔍", fontSize = 18.sp)
+            StationeryIcon(name = "search", size = 18.dp, tint = colors.neonBlue)
         }
     }
 }

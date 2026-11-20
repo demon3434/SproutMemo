@@ -14,19 +14,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sproutmemo.android.data.remote.model.StatsOverviewDto
+import com.sproutmemo.android.ui.components.StationeryCard
 import com.sproutmemo.android.ui.theme.LocalAppColors
 
 @Composable
 fun ReviewPoolStatsCard(stats: StatsOverviewDto?) {
     val colors = LocalAppColors.current
 
-    Card(
+    StationeryCard(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 6.dp),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = colors.cardBg),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            .padding(vertical = 6.dp)
     ) {
         Column(
             modifier = Modifier.padding(20.dp),
@@ -50,7 +48,7 @@ fun ReviewPoolStatsCard(stats: StatsOverviewDto?) {
                 modifier = Modifier
                     .fillMaxWidth(0.8f)
                     .height(1.dp)
-                    .background(colors.textSecondary.copy(alpha = 0.2f))
+                    .background(colors.rule)
             )
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -65,7 +63,7 @@ fun ReviewPoolStatsCard(stats: StatsOverviewDto?) {
                         fontWeight = FontWeight.Bold,
                         color = colors.textPrimary
                     )
-                    Text("习题总量", fontSize = 11.sp, color = colors.textSecondary)
+                    Text("习题总量", fontSize = 13.sp, color = colors.textSecondary)
                 }
 
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -73,9 +71,9 @@ fun ReviewPoolStatsCard(stats: StatsOverviewDto?) {
                         text = "${stats?.today_completed_notes ?: 0}",
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF10B981)
+                        color = colors.neonGreen
                     )
-                    Text("今日已复习题", fontSize = 11.sp, color = colors.textSecondary)
+                    Text("今日已复习题", fontSize = 13.sp, color = colors.textSecondary)
                 }
             }
         }

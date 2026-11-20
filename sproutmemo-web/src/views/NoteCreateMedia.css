@@ -1,0 +1,197 @@
+/* 图片上传区 */
+.image-uploader-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.preview-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  cursor: grab;
+  user-select: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.preview-item:active {
+  cursor: grabbing;
+}
+
+/* 拖动时留在原地的占位元素样式 (极低透明度，显示虚影) */
+.preview-item.dragging {
+  opacity: 0.25;
+}
+.preview-item.dragging .preview-card {
+  border: 1px dashed var(--border) !important;
+  box-shadow: none !important;
+}
+.preview-item.dragging img {
+  opacity: 0.3;
+  filter: grayscale(80%);
+}
+
+/* 拖动悬停在目标上方时的虚线框视觉效果 */
+.preview-item.drag-over .preview-card {
+  border: 2px dashed var(--primary) !important;
+  transform: scale(0.98);
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
+}
+
+.image-title-input {
+  width: 100%;
+  padding: 4px 6px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background-color: var(--bg-card);
+  color: var(--text-main);
+  font-size: 11px;
+  text-align: center;
+  margin-top: 4px;
+  transition: var(--transition);
+}
+.image-title-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px var(--primary-light);
+}
+
+.preview-card {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  width: 100%;
+}
+
+.preview-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.file-size-label {
+  font-size: 10px;
+  color: #94a3b8;
+  font-weight: 400;
+  margin-top: 2px;
+}
+
+/* 鼠标悬停展示原始文件名 tooltip 视觉效果 */
+.preview-item[data-tooltip] {
+  position: relative;
+}
+.preview-item[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 4px);
+  left: 50%;
+  transform: translateX(-50%) scale(0.9);
+  background-color: rgba(15, 23, 42, 0.85);
+  color: #ffffff;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  font-size: 10px;
+  font-weight: 400;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  z-index: 50;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+.preview-item[data-tooltip]:hover::after {
+  opacity: 1;
+  transform: translateX(-50%) scale(1);
+}
+.preview-item[data-tooltip].dragging::after {
+  display: none !important;
+}
+
+.rotate-card-btn {
+  position: absolute;
+  top: 4px; left: 4px;
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: rgba(15, 23, 42, 0.72);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 0;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: var(--transition);
+  z-index: 20;
+  backdrop-filter: blur(4px);
+}
+.rotate-card-btn:hover {
+  background: var(--primary, #3b82f6);
+  border-color: var(--primary, #3b82f6);
+  transform: scale(1.1);
+}
+
+.remove-btn {
+  position: absolute;
+  top: 4px; right: 4px;
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  background: rgba(239, 68, 68, 0.85);
+  color: #fff;
+  border: none;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: var(--transition);
+}
+.remove-btn:hover {
+  background: #dc2626;
+  transform: scale(1.1);
+}
+
+.upload-trigger-btn {
+  aspect-ratio: 1;
+  border: 2px dashed var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-input);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition);
+}
+.upload-trigger-btn:hover {
+  border-color: var(--primary);
+  background: var(--primary-light);
+  color: var(--primary);
+}
+
+.upload-icon { font-size: 24px; margin-bottom: 4px; }
+.upload-text { font-size: 12px; font-weight: 600; }
+
+.submit-btn {
+  width: 100%;
+  height: 46px;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.error-box {
+  background: #fee2e2;
+  border: 1px solid #fca5a5;
+  color: #b91c1c;
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 700;
+  margin-top: 10px;
+}
+
+.hint-text {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 8px;
+}
+

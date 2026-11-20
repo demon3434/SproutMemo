@@ -1,5 +1,8 @@
 package com.sproutmemo.android.ui.components
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -17,7 +20,7 @@ fun RequiredLabel(text: String, isRequired: Boolean = true) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         Text(text)
         if (isRequired) {
-            Text(" *", color = Color.Red, fontWeight = FontWeight.Bold)
+            Text(" *", color = Color(0xFFC82323), fontWeight = FontWeight.Bold)
         }
     }
 }
@@ -46,29 +49,56 @@ fun <T> StyledDropdown(
             onValueChange = {},
             readOnly = true,
             label = { RequiredLabel(label, isRequired) },
-            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+            trailingIcon = {
+                StationeryIcon(
+                    name = "chevron-down",
+                    size = 16.dp,
+                    tint = if (expanded) colors.neonBlue else colors.textSecondary
+                )
+            },
             colors = OutlinedTextFieldDefaults.colors(
                 focusedTextColor = colors.textPrimary,
                 unfocusedTextColor = colors.textPrimary,
+                focusedContainerColor = colors.cardBg,
+                unfocusedContainerColor = colors.cardBg,
                 focusedBorderColor = colors.neonBlue,
-                unfocusedBorderColor = colors.textSecondary.copy(alpha = 0.3f),
+                unfocusedBorderColor = colors.rule,
                 focusedLabelColor = colors.neonBlue,
                 unfocusedLabelColor = colors.textSecondary
             ),
             modifier = Modifier
                 .menuAnchor()
                 .fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp),
+            shape = RoundedCornerShape(14.dp),
             singleLine = true
         )
 
         ExposedDropdownMenu(
             expanded = expanded,
-            onDismissRequest = { expanded = false }
+            onDismissRequest = { expanded = false },
+            modifier = Modifier
+                .background(colors.cardBg)
+                .border(1.5.dp, colors.rule, RoundedCornerShape(12.dp))
         ) {
             items.forEach { item ->
+                val isSelected = item == selectedItem
                 DropdownMenuItem(
-                    text = { Text(itemToString(item)) },
+                    text = {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = itemToString(item),
+                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                color = if (isSelected) colors.neonBlue else colors.textPrimary
+                            )
+                            if (isSelected) {
+                                StationeryIcon(name = "check", size = 15.dp, tint = colors.neonBlue)
+                            }
+                        }
+                    },
                     onClick = {
                         onItemSelected(item)
                         expanded = false

@@ -1,13 +1,8 @@
 import { ref, computed, watch } from 'vue';
 import { api } from '../services/api.js';
 import { showConfirm, showAlert, showThreeButtonConfirm } from '../services/dialog.js';
-import { compressImage, rotateImageFile } from '../utils/imageCompressor.js';
-
-function getAbsoluteUrl(relPath) {
-  if (!relPath) return '';
-  const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
-  return `${baseUrl.replace('/api/v1', '')}/uploads/${relPath}`;
-}
+import { useNoteDetailMedia } from './useNoteDetailMedia.js';
+import { saveNoteDetailEdits, getAbsoluteUrl, masteryName } from './useNoteDetailSave.js';
 
 export function useNoteDetail(props, emit, currentUser) {
   const isEditMode = ref(false);
@@ -52,41 +47,14 @@ export function useNoteDetail(props, emit, currentUser) {
     }, 200);
   }
 
-  // 统一的媒体附件列表 (合并已有和新增，支持排序和统一删除管理)
-  // 项结构:
-  // - 已有附件: { id, isNew: false, file_type, storage_path, original_name, title }
-  // - 新增附件: { isNew: true, file, file_type: 'IMAGE', blobUrl, original_name, title }
-  const combinedMediaList = ref([]);
-  const deleteAttachmentIds = ref([]);
-
-  // 拖拽排序状态
-  const dragIndex = ref(null);
-  const dragOverIndex = ref(null);
-  const isInputActive = ref(false);
-
-  // 大图轮播预览状态
-  const previewIndex = ref(null);
-  const zoomScale = ref(1);
+  const media = useNoteDetailMedia(props, emit, isEditMode);
+  const {
+    combinedMediaList,
+    deleteAttachmentIds
+  } = media;
 
   // 难度评分悬浮状态
   const hoverStars = ref(0);
-
-  // 计算属性
-  const images = computed(() => {
-    return props.note?.attachments?.filter(a => a.file_type === 'IMAGE') || [];
-  });
-
-  const audios = computed(() => {
-    return props.note?.attachments?.filter(a => a.file_type === 'AUDIO') || [];
-  });
-
-  const videos = computed(() => {
-    return props.note?.attachments?.filter(a => a.file_type === 'VIDEO') || [];
-  });
-
-  const totalImagesCount = computed(() => {
-    return combinedMediaList.value.filter(a => a.file_type === 'IMAGE').length;
-  });
 
   const editFilteredSemesters = computed(() => {
     if (!editStageId.value) return [];
@@ -249,129 +217,6 @@ export function useNoteDetail(props, emit, currentUser) {
       await showAlert('网络故障，更新失败');
       emit('refresh');
     }
-  }
-
-  // ── 大图轮播预览控制 ──
-  function openFullScreen(url, idx) {
-    previewIndex.value = idx;
-    zoomScale.value = 1;
-  }
-
-  function closePreview() {
-    previewIndex.value = null;
-    zoomScale.value = 1;
-  }
-
-  function zoomIn() {
-    if (zoomScale.value < 4) {
-      zoomScale.value = parseFloat((zoomScale.value + 0.15).toFixed(2));
-    }
-  }
-
-  function zoomOut() {
-    if (zoomScale.value > 0.3) {
-      zoomScale.value = parseFloat((zoomScale.value - 0.15).toFixed(2));
-    }
-  }
-
-  function resetZoom() {
-    zoomScale.value = 1;
-  }
-
-  function handleZoomWheel(event) {
-    if (event.deltaY < 0) {
-      zoomIn();
-    } else {
-      zoomOut();
-    }
-  }
-
-  const previewImages = computed(() => {
-    if (isEditMode.value) {
-      return combinedMediaList.value.filter(a => a.file_type === 'IMAGE');
-    }
-    return props.note?.attachments?.filter(a => a.file_type === 'IMAGE') || [];
-  });
-
-  function getEditImageIndex(combinedIdx) {
-    const list = combinedMediaList.value.filter(a => a.file_type === 'IMAGE');
-    const targetItem = combinedMediaList.value[combinedIdx];
-    return list.indexOf(targetItem);
-  }
-
-  async function persistViewModeRotation(item, deltaAngle) {
-    if (!props.note?.id || !item?.id) return;
-    try {
-      const res = await api.post(`/notes/${props.note.id}/attachments/${item.id}/rotate`, {
-        angle: deltaAngle
-      });
-      if (res.data?.code === 200 && res.data.data) {
-        const updatedNote = res.data.data;
-        const updatedAtt = (updatedNote.attachments || []).find(a => a.id === item.id);
-        if (updatedAtt) {
-          item.storage_path = updatedAtt.storage_path;
-          item.file_size = updatedAtt.file_size;
-          item.rotation = 0;
-        }
-        props.note.updated_at = updatedNote.updated_at;
-        props.note.sync_base_time = updatedNote.sync_base_time;
-        emit('refresh');
-      }
-    } catch (err) {
-      console.error('Failed to persist image rotation:', err);
-    }
-  }
-
-  function rotateLeft() {
-    const idx = previewIndex.value;
-    if (idx === null) return;
-    const item = previewImages.value[idx];
-    if (item) {
-      if (isEditMode.value) {
-        item.rotation = ((item.rotation || 0) - 90) % 360;
-      } else {
-        persistViewModeRotation(item, -90);
-      }
-    }
-  }
-
-  function rotateRight() {
-    const idx = previewIndex.value;
-    if (idx === null) return;
-    const item = previewImages.value[idx];
-    if (item) {
-      if (isEditMode.value) {
-        item.rotation = ((item.rotation || 0) + 90) % 360;
-      } else {
-        persistViewModeRotation(item, 90);
-      }
-    }
-  }
-
-  function rotateCombinedMediaAt(combinedIdx, deltaAngle = 90) {
-    const item = combinedMediaList.value[combinedIdx];
-    if (item && item.file_type === 'IMAGE') {
-      item.rotation = ((item.rotation || 0) + deltaAngle) % 360;
-    }
-  }
-
-  function prevPreview() {
-    if (previewImages.value.length === 0) return;
-    previewIndex.value = (previewIndex.value - 1 + previewImages.value.length) % previewImages.value.length;
-    zoomScale.value = 1;
-  }
-
-  // 仅供大图查看定位 index 映射
-  const imageIndexMapping = computed(() => {
-    return combinedMediaList.value
-      .map((item, idx) => ({ item, originalIndex: idx }))
-      .filter(x => x.item.file_type === 'IMAGE');
-  });
-
-  function nextPreview() {
-    if (previewImages.value.length === 0) return;
-    previewIndex.value = (previewIndex.value + 1) % previewImages.value.length;
-    zoomScale.value = 1;
   }
 
   // ── 进入/退出编辑模式 ──
@@ -575,263 +420,34 @@ export function useNoteDetail(props, emit, currentUser) {
     }
   );
 
-  // ── 附件顺序调整 & 移除 ──
-  function moveMediaLeft(idx) {
-    if (idx === 0) return;
-    const list = [...combinedMediaList.value];
-    const temp = list[idx];
-    list[idx] = list[idx - 1];
-    list[idx - 1] = temp;
-    combinedMediaList.value = list;
-  }
-
-  function moveMediaRight(idx) {
-    if (idx === combinedMediaList.value.length - 1) return;
-    const list = [...combinedMediaList.value];
-    const temp = list[idx];
-    list[idx] = list[idx + 1];
-    list[idx + 1] = temp;
-    combinedMediaList.value = list;
-  }
-
-  async function removeMedia(idx) {
-    const item = combinedMediaList.value[idx];
-    const ok = await showConfirm(`确定要删除此${item.file_type === 'IMAGE' ? '图片' : item.file_type === 'AUDIO' ? '录音' : '视频'}附件吗？`);
-    if (!ok) return;
-
-    if (!item.isNew) {
-      deleteAttachmentIds.value.push(item.id);
-    }
-    combinedMediaList.value.splice(idx, 1);
-  }
-
-  // 拖拽附件排序
-  function handleDragStart(event, idx) {
-    if (event.dataTransfer) {
-      event.dataTransfer.effectAllowed = 'move';
-      
-      // 获取当前卡片中的 img 元素作为拖拽快照（如果是音视频，就使用图标卡片）
-      const imgEl = event.currentTarget.querySelector('.preview-card img') || event.currentTarget.querySelector('.media-file-icon-box');
-      if (imgEl) {
-        event.dataTransfer.setDragImage(imgEl, 50, 50);
-      }
-    }
-    
-    setTimeout(() => {
-      dragIndex.value = idx;
-    }, 0);
-  }
-
-  function handleDragOver(e, index) {
-    dragOverIndex.value = index;
-  }
-
-  function handleDragEnter(e, index) {
-    dragOverIndex.value = index;
-  }
-
-  function handleDragLeave(e, index) {
-    if (dragOverIndex.value === index) {
-      dragOverIndex.value = null;
-    }
-  }
-
-  function handleDrop(e, index) {
-    if (dragIndex.value === null || dragIndex.value === index) return;
-    const list = [...combinedMediaList.value];
-    const draggedItem = list[dragIndex.value];
-    
-    // 移出原位置并插入新位置
-    list.splice(dragIndex.value, 1);
-    list.splice(index, 0, draggedItem);
-    
-    combinedMediaList.value = list;
-    dragIndex.value = null;
-    dragOverIndex.value = null;
-  }
-
-  function handleDragEnd() {
-    dragIndex.value = null;
-    dragOverIndex.value = null;
-  }
-
-  // 图片压缩与添加至统一轨道
-  async function handleEditFileChange(event) {
-    const files = event.target.files;
-    if (!files) return;
-
-    for (let i = 0; i < files.length; i++) {
-      if (totalImagesCount.value >= 9) {
-        await showAlert('总图片数量不能超过 9 张！');
-        break;
-      }
-      const file = files[i];
-      try {
-        const compressedFile = await compressImage(file);
-        combinedMediaList.value.push({
-          isNew: true,
-          file: compressedFile,
-          file_type: 'IMAGE',
-          blobUrl: URL.createObjectURL(compressedFile),
-          original_name: file.name,
-          title: '',
-          rotation: 0
-        });
-      } catch (err) {
-        console.error(err);
-        combinedMediaList.value.push({
-          isNew: true,
-          file: file,
-          file_type: 'IMAGE',
-          blobUrl: URL.createObjectURL(file),
-          original_name: file.name,
-          title: '',
-          rotation: 0
-        });
-      }
-    }
-    event.target.value = '';
-  }
-
   // ── 保存编辑表单 ──
-  async function handleEditSave() {
-    submitError.value = '';
-
-    if (!editSemesterId.value) {
-      submitError.value = '请选择学期';
-      return;
-    }
-    if (!editSubjectId.value) {
-      submitError.value = '请选择学科';
-      return;
-    }
-
-    if (editSourceType.value === 'BOOK') {
-      if (!editBookId.value) {
-        submitError.value = '请选择关联的习题册';
-        return;
-      }
-      if (!editPageNumber.value.trim()) {
-        submitError.value = '关联习题册时，页码为必填项';
-        return;
-      }
-    } else {
-      if (!editSourcePaperName.value.trim()) {
-        submitError.value = '请输入自定义来源/试卷名称';
-        return;
-      }
-    }
-
-    const ok = await showConfirm('确定要保存对该习题笔记的修改吗？');
-    if (!ok) return;
-
-    saving.value = true;
-
-    try {
-      // 保存前对有旋转的图片附件进行 Canvas 物理旋转
-      for (let i = 0; i < combinedMediaList.value.length; i++) {
-        const item = combinedMediaList.value[i];
-        if (item.file_type === 'IMAGE' && item.rotation && item.rotation !== 0) {
-          try {
-            if (item.isNew) {
-              const rotatedFile = await rotateImageFile(item.file, item.rotation);
-              item.file = rotatedFile;
-              if (item.blobUrl) {
-                URL.revokeObjectURL(item.blobUrl);
-              }
-              item.blobUrl = URL.createObjectURL(rotatedFile);
-              item.rotation = 0;
-            } else {
-              const imageUrl = getAbsoluteUrl(item.storage_path);
-              const rotatedFile = await rotateImageFile(imageUrl, item.rotation);
-              deleteAttachmentIds.value.push(item.id);
-              combinedMediaList.value[i] = {
-                isNew: true,
-                file: rotatedFile,
-                file_type: 'IMAGE',
-                blobUrl: URL.createObjectURL(rotatedFile),
-                original_name: item.original_name,
-                title: item.title || '',
-                rotation: 0
-              };
-            }
-          } catch (err) {
-            console.error('Failed to rotate image before save:', err);
-          }
-        }
-      }
-
-      const formData = new FormData();
-      formData.append('semester_id', editSemesterId.value);
-      formData.append('subject_id', editSubjectId.value);
-      formData.append('mastery_level', editMasteryLevel.value);
-      formData.append('difficulty_stars', editDifficultyStars.value.toFixed(1));
-      formData.append('exclude_from_review', (!editIsInReviewPool.value).toString());
-      formData.append('unit_code', editUnitCode.value.toString());
-      formData.append('auxiliary_text', editAuxiliaryText.value.trim());
-      formData.append('sync_base_time', props.note.updated_at); // 乐观锁
-
-      if (editSourceType.value === 'BOOK') {
-        formData.append('question_source_id', editBookId.value);
-        formData.append('page_number', editPageNumber.value.trim());
-        formData.append('source_paper_name', '');
-      } else {
-        formData.append('question_source_id', '');
-        formData.append('source_paper_name', editSourcePaperName.value.trim());
-        formData.append('paper_category', editPaperCategory.value);
-        formData.append('page_number', '');
-      }
-
-      // 待物理删除列表
-      for (const attId of deleteAttachmentIds.value) {
-        formData.append('delete_attachment_ids', attId);
-      }
-
-      // 序列化现有附件的新排序 metadata
-      const existingMeta = [];
-      let sortOrderCounter = 0;
-      
-      combinedMediaList.value.forEach((item) => {
-        if (!item.isNew) {
-          existingMeta.push({
-            id: item.id,
-            title: item.title,
-            sort_order: sortOrderCounter++
-          });
-        }
-      });
-      formData.append('attachment_metadata', JSON.stringify(existingMeta));
-
-      // 追加新增图片文件及自定义标题 (按目前列表顺序)
-      combinedMediaList.value.forEach((item) => {
-        if (item.isNew) {
-          formData.append('images', item.file);
-          formData.append('image_titles', item.title || '');
-        }
-      });
-
-      const res = await api.put(`/notes/${props.note.id}`, formData);
-      if (res.ok) {
-        await showAlert('习题笔记更新成功！');
-        isEditMode.value = false;
-        emit('refresh');
-      } else {
-        const errRes = await res.json();
-        submitError.value = errRes.msg || '保存失败';
-      }
-    } catch (err) {
-      submitError.value = '网络保存失败，请检查连接';
-    } finally {
-      saving.value = false;
-    }
-  }
-
-  function masteryName(level) {
-    const map = { CLUELESS: '🔴 完全不会', PARTIAL: '🟡 一知半解', MASTERED: '🟢 熟练掌握' };
-    return map[level] || level;
+  function handleEditSave() {
+    return saveNoteDetailEdits({
+      props,
+      emit,
+      getAbsoluteUrl,
+      isEditMode,
+      saving,
+      submitError,
+      editSemesterId,
+      editSubjectId,
+      editSourceType,
+      editBookId,
+      editPageNumber,
+      editSourcePaperName,
+      editPaperCategory,
+      editUnitCode,
+      editDifficultyStars,
+      editMasteryLevel,
+      editIsInReviewPool,
+      editAuxiliaryText,
+      combinedMediaList,
+      deleteAttachmentIds
+    });
   }
 
   return {
+    ...media,
     isEditMode,
     saving,
     submitError,
@@ -855,36 +471,12 @@ export function useNoteDetail(props, emit, currentUser) {
     editAuxiliaryText,
     editSubjects,
     editBooks,
-    combinedMediaList,
-    deleteAttachmentIds,
-    dragIndex,
-    dragOverIndex,
-    isInputActive,
-    previewIndex,
-    zoomScale,
     hoverStars,
-    images,
-    previewImages,
-    getEditImageIndex,
-    rotateLeft,
-    rotateRight,
-    rotateCombinedMediaAt,
-    audios,
-    videos,
-    totalImagesCount,
     editFilteredSemesters,
     hasChanges,
     handleDirectMasteryChange,
     handleDirectStarsChange,
     handleDirectReviewPoolChange,
-    openFullScreen,
-    closePreview,
-    zoomIn,
-    zoomOut,
-    resetZoom,
-    handleZoomWheel,
-    prevPreview,
-    nextPreview,
     enterEditMode,
     exitEditMode,
     handleCloseWithPrompt,
@@ -892,16 +484,6 @@ export function useNoteDetail(props, emit, currentUser) {
     onEditSemesterChange,
     onEditSubjectChange,
     setEditSourceType,
-    moveMediaLeft,
-    moveMediaRight,
-    removeMedia,
-    handleDragStart,
-    handleDragOver,
-    handleDragEnter,
-    handleDragLeave,
-    handleDrop,
-    handleDragEnd,
-    handleEditFileChange,
     handleEditSave,
     masteryName,
     editPaperSuggestions,

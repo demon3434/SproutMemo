@@ -1,6 +1,7 @@
 package com.sproutmemo.android.ui.review
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -23,6 +24,15 @@ import coil.compose.AsyncImage
 import com.sproutmemo.android.data.remote.ApiClient
 import com.sproutmemo.android.data.remote.model.ReviewSessionDto
 import com.sproutmemo.android.ui.components.AudioPlayerTile
+import com.sproutmemo.android.ui.components.MasteryStampRow
+import com.sproutmemo.android.ui.components.ReviewOutcomeRow
+import com.sproutmemo.android.ui.components.StarRatingStickerBar
+import com.sproutmemo.android.ui.components.StationeryCandyProgressBar
+import com.sproutmemo.android.ui.components.StationeryCard
+import com.sproutmemo.android.ui.components.StationeryIcon
+import com.sproutmemo.android.ui.components.StationeryLinedNoteBox
+import com.sproutmemo.android.ui.components.gridPaper
+import com.sproutmemo.android.ui.theme.LocalAppColors
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -47,26 +57,32 @@ fun ReviewPracticeTabletContent(
 ) {
     val currentNote = session.notes.orEmpty().getOrNull(currentIndex) ?: return
     val context = LocalContext.current
+    val colors = LocalAppColors.current
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("🎯 沉浸式复习答题 (平板模式)", fontSize = 18.sp, fontWeight = FontWeight.Bold) },
+                title = {
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        StationeryIcon(name = "target", size = 18.dp, tint = colors.neonBlue)
+                        Text("沉浸式复习答题 (平板模式)", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = colors.textPrimary)
+                    }
+                },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = colors.textPrimary)
                     }
                 },
                 actions = {
                     Text(
-                        text = "⏱️ $timerText",
+                        text = timerText,
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF4F46E5),
+                        color = colors.neonBlue,
                         modifier = Modifier.padding(end = 16.dp)
                     )
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = colors.cardBg)
             )
         }
     ) { innerPadding ->
@@ -74,138 +90,147 @@ fun ReviewPracticeTabletContent(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .background(Color(0xFFF8FAFC))
+                .gridPaper(colors.darkBg, colors.rule)
         ) {
             // 左分栏 (65%): 题目内容与多媒体 (滚动)
-            Column(
+            StationeryCard(
                 modifier = Modifier
                     .weight(1.6f)
                     .fillMaxHeight()
                     .padding(16.dp)
-                    .background(Color.White, shape = RoundedCornerShape(16.dp))
-                    .padding(16.dp)
-                    .verticalScroll(rememberScrollState())
             ) {
-                // 试卷来源 & 页码
-                val sourceName = currentNote.source_paper_name ?: currentNote.question_source_name ?: "习题笔记"
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
+                Column(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .background(Color(0xFFF1F5F9), shape = RoundedCornerShape(8.dp))
-                        .padding(horizontal = 12.dp, vertical = 8.dp)
-                ) {
-                    Text("📖", fontSize = 14.sp)
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text(
-                        text = sourceName,
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFF334155),
-                        modifier = Modifier.weight(1f)
-                    )
-                    if (!currentNote.page_number.isNullOrBlank()) {
-                        Text(
-                            text = "P. ${currentNote.page_number}",
-                            fontSize = 11.sp,
-                            color = Color(0xFF4F46E5),
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier
-                                .background(Color(0xFFEEF2FF), shape = RoundedCornerShape(4.dp))
-                                .padding(horizontal = 6.dp, vertical = 2.dp)
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Text("习题正文", fontSize = 12.sp, color = Color(0xFF94A3B8), fontWeight = FontWeight.Bold)
-                Spacer(modifier = Modifier.height(6.dp))
-                Text(
-                    text = currentNote.auxiliary_text ?: "(无描述)",
-                    fontSize = 16.sp,
-                    lineHeight = 24.sp,
-                    color = Color(0xFF1E293B),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(Color(0xFFF8FAFC), shape = RoundedCornerShape(8.dp))
+                        .fillMaxSize()
                         .padding(16.dp)
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // 多媒体附件展示区 (按类别分组展示)
-                val images = remember(currentNote.id) {
-                    currentNote.attachments.filter { it.file_type?.equals("IMAGE", ignoreCase = true) == true }
-                }
-                val audios = remember(currentNote.id) {
-                    currentNote.attachments.filter { it.file_type?.equals("AUDIO", ignoreCase = true) == true }
-                }
-                val videos = remember(currentNote.id) {
-                    currentNote.attachments.filter { it.file_type?.equals("VIDEO", ignoreCase = true) == true }
-                }
-
-                if (images.isNotEmpty() || audios.isNotEmpty() || videos.isNotEmpty()) {
-                    Text("多媒体附件", fontSize = 12.sp, color = Color(0xFF94A3B8), fontWeight = FontWeight.Bold)
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        images.forEach { attach ->
-                            val fullUrl = ApiClient.getFullAttachmentUrl(context, attach.storage_path)
-                            Box(
+                        .verticalScroll(rememberScrollState())
+                ) {
+                    // 试卷来源 & 页码
+                    val sourceName = currentNote.source_paper_name ?: currentNote.question_source_name ?: "习题笔记"
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(colors.paper2, shape = RoundedCornerShape(10.dp))
+                            .padding(horizontal = 12.dp, vertical = 8.dp)
+                    ) {
+                        StationeryIcon(
+                            name = if (currentNote.source_type == "BOOK") "book" else "file",
+                            size = 15.dp,
+                            tint = colors.neonBlue
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = sourceName,
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = colors.textPrimary,
+                            modifier = Modifier.weight(1f)
+                        )
+                        if (!currentNote.page_number.isNullOrBlank()) {
+                            Text(
+                                text = "P. ${currentNote.page_number}",
+                                fontSize = 13.sp,
+                                color = colors.neonBlue,
+                                fontWeight = FontWeight.Bold,
                                 modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(260.dp)
-                                    .clip(RoundedCornerShape(8.dp))
-                                    .background(Color(0xFFF8FAFC))
-                                    .clickable { onOpenImage(fullUrl) }
-                            ) {
-                                AsyncImage(
-                                    model = fullUrl,
-                                    contentDescription = "Attachment Image",
-                                    modifier = Modifier.fillMaxSize(),
-                                    contentScale = ContentScale.Fit
-                                )
-                                Text(
-                                    text = "🔍 点击放大缩放",
-                                    color = Color.White,
-                                    fontSize = 11.sp,
-                                    modifier = Modifier
-                                        .align(Alignment.BottomEnd)
-                                        .background(Color.Black.copy(alpha = 0.6f), shape = RoundedCornerShape(topStart = 8.dp))
-                                        .padding(horizontal = 8.dp, vertical = 4.dp)
-                                )
-                            }
-                        }
-
-                        audios.forEach { attach ->
-                            val fullUrl = ApiClient.getFullAttachmentUrl(context, attach.storage_path)
-                            AudioPlayerTile(
-                                audioUrl = fullUrl,
-                                title = attach.original_name ?: "音频文件"
+                                    .background(colors.neonBlue.copy(alpha = 0.12f), shape = RoundedCornerShape(4.dp))
+                                    .padding(horizontal = 6.dp, vertical = 2.dp)
                             )
                         }
+                    }
 
-                        videos.forEach { attach ->
-                            val fullUrl = ApiClient.getFullAttachmentUrl(context, attach.storage_path)
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(180.dp)
-                                    .clip(RoundedCornerShape(8.dp))
-                                    .background(Color.DarkGray)
-                                    .clickable { onOpenVideo(fullUrl) },
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                    Text("🎬", fontSize = 36.sp)
-                                    Spacer(modifier = Modifier.height(4.dp))
-                                    Text(
-                                        text = attach.original_name ?: "点击播放视频",
-                                        color = Color.White,
-                                        fontSize = 13.sp,
-                                        fontWeight = FontWeight.Bold
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Text("习题正文", fontSize = 13.5.sp, color = colors.textSecondary, fontWeight = FontWeight.Bold)
+                    Spacer(modifier = Modifier.height(6.dp))
+                    StationeryLinedNoteBox(
+                        text = currentNote.auxiliary_text,
+                        emptyPlaceholder = "(无描述)"
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // 多媒体附件展示区 (按类别分组展示)
+                    val images = remember(currentNote.id) {
+                        currentNote.attachments.filter { it.file_type?.equals("IMAGE", ignoreCase = true) == true }
+                    }
+                    val audios = remember(currentNote.id) {
+                        currentNote.attachments.filter { it.file_type?.equals("AUDIO", ignoreCase = true) == true }
+                    }
+                    val videos = remember(currentNote.id) {
+                        currentNote.attachments.filter { it.file_type?.equals("VIDEO", ignoreCase = true) == true }
+                    }
+
+                    if (images.isNotEmpty() || audios.isNotEmpty() || videos.isNotEmpty()) {
+                        Text("多媒体附件", fontSize = 13.5.sp, color = colors.textSecondary, fontWeight = FontWeight.Bold)
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                            images.forEach { attach ->
+                                val fullUrl = ApiClient.getFullAttachmentUrl(context, attach.storage_path)
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(260.dp)
+                                        .clip(RoundedCornerShape(10.dp))
+                                        .background(colors.paper2)
+                                        .clickable { onOpenImage(fullUrl) }
+                                ) {
+                                    AsyncImage(
+                                        model = fullUrl,
+                                        contentDescription = "Attachment Image",
+                                        modifier = Modifier.fillMaxSize(),
+                                        contentScale = ContentScale.Fit
                                     )
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                        modifier = Modifier
+                                            .align(Alignment.BottomEnd)
+                                            .background(Color.Black.copy(alpha = 0.6f), shape = RoundedCornerShape(topStart = 8.dp))
+                                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                                    ) {
+                                        StationeryIcon(name = "search", size = 12.dp, tint = Color.White)
+                                        Text(
+                                            text = "点击放大缩放",
+                                            color = Color.White,
+                                            fontSize = 13.sp
+                                        )
+                                    }
+                                }
+                            }
+
+                            audios.forEach { attach ->
+                                val fullUrl = ApiClient.getFullAttachmentUrl(context, attach.storage_path)
+                                AudioPlayerTile(
+                                    audioUrl = fullUrl,
+                                    title = attach.original_name ?: "音频文件"
+                                )
+                            }
+
+                            videos.forEach { attach ->
+                                val fullUrl = ApiClient.getFullAttachmentUrl(context, attach.storage_path)
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(180.dp)
+                                        .clip(RoundedCornerShape(12.dp))
+                                        .background(colors.paper2)
+                                        .border(1.5.dp, colors.edge, RoundedCornerShape(12.dp))
+                                        .clickable { onOpenVideo(fullUrl) },
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                        StationeryIcon(name = "video", size = 36.dp, tint = colors.neonBlue)
+                                        Spacer(modifier = Modifier.height(6.dp))
+                                        Text(
+                                            text = attach.original_name ?: "点击播放视频",
+                                            color = colors.textPrimary,
+                                            fontSize = 14.sp,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -222,23 +247,31 @@ fun ReviewPracticeTabletContent(
                     .verticalScroll(rememberScrollState())
             ) {
                 // 1. 进度卡片
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White)
+                StationeryCard(
+                    modifier = Modifier.fillMaxWidth()
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
-                        Text(
-                            text = "🎯 复习进度: ${session.completed_count} / ${session.target_count}",
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xFF1E293B)
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            StationeryIcon(name = "target", size = 16.dp, tint = colors.neonBlue)
+                            Text(
+                                text = "复习进度: ${session.completed_count} / ${session.target_count}",
+                                fontSize = 15.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = colors.textPrimary
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(8.dp))
+                        StationeryCandyProgressBar(
+                            progress = session.completed_count.toFloat() / session.target_count.coerceAtLeast(1)
                         )
                         Spacer(modifier = Modifier.height(12.dp))
                         Text(
                             text = "题号切换:",
-                            fontSize = 11.sp,
-                            color = Color(0xFF64748B),
+                            fontSize = 13.sp,
+                            color = colors.textSecondary,
                             fontWeight = FontWeight.Bold
                         )
                         Spacer(modifier = Modifier.height(8.dp))
@@ -252,13 +285,13 @@ fun ReviewPracticeTabletContent(
                         ) {
                             session.notes.orEmpty().forEachIndexed { idx, n ->
                                 val isSelected = idx == currentIndex
-                                val isCompleted = n.is_completed || (session.completed_count > idx && !isSelected) // or logic
+                                val isCompleted = n.is_completed || (session.completed_count > idx && !isSelected)
                                 
                                 Button(
                                     onClick = { onSelectNote(idx) },
                                     colors = ButtonDefaults.buttonColors(
-                                        containerColor = if (isSelected) Color(0xFF4F46E5) else if (isCompleted) Color(0xFFE8F5E9) else Color(0xFFF1F5F9),
-                                        contentColor = if (isSelected) Color.White else if (isCompleted) Color(0xFF2E7D32) else Color(0xFF475569)
+                                        containerColor = if (isSelected) colors.neonBlue else if (isCompleted) colors.neonGreen.copy(alpha = 0.16f) else colors.paper2,
+                                        contentColor = if (isSelected) Color.White else if (isCompleted) colors.neonGreen else colors.textSecondary
                                     ),
                                     shape = RoundedCornerShape(8.dp),
                                     modifier = Modifier.size(42.dp),
@@ -271,12 +304,11 @@ fun ReviewPracticeTabletContent(
                                             fontSize = 14.sp
                                         )
                                         if (isCompleted) {
-                                            Text(
-                                                text = "✓",
-                                                fontSize = 9.sp,
-                                                fontWeight = FontWeight.Bold,
-                                                color = if (isSelected) Color.White else Color(0xFF2E7D32),
-                                                modifier = Modifier.align(Alignment.TopEnd).padding(top = 1.dp, end = 2.dp)
+                                            StationeryIcon(
+                                                name = "check",
+                                                size = 9.dp,
+                                                tint = if (isSelected) Color.White else colors.neonGreen,
+                                                modifier = Modifier.align(Alignment.TopEnd).padding(top = 2.dp, end = 2.dp)
                                             )
                                         }
                                     }
@@ -289,122 +321,52 @@ fun ReviewPracticeTabletContent(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 // 2. 打卡回单反馈卡片
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White)
+                StationeryCard(
+                    modifier = Modifier.fillMaxWidth()
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
-                        Text(
-                            text = "📝 本题作答结果",
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xFF1E293B)
-                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            StationeryIcon(name = "pen", size = 16.dp, tint = colors.neonBlue)
+                            Text(
+                                text = "本题作答结果",
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = colors.textPrimary
+                            )
+                        }
                         Spacer(modifier = Modifier.height(12.dp))
 
-                        // 反馈三选一 (横向并列)
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(6.dp),
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            val outcomes = listOf(
-                                Triple("WRONG", "🔴 没做对", Color(0xFFEF4444)),
-                                Triple("PARTIALLY_CORRECT", "🟡 勉强答对", Color(0xFFF59E0B)),
-                                Triple("CORRECT", "🟢 轻松过关", Color(0xFF10B981))
-                            )
-
-                            outcomes.forEach { (code, name, colorTheme) ->
-                                val isSelected = selectedOutcome == code
-                                Button(
-                                    onClick = { onSelectOutcome(code) },
-                                    colors = ButtonDefaults.buttonColors(
-                                        containerColor = if (isSelected) colorTheme else Color(0xFFF8FAFC),
-                                        contentColor = if (isSelected) Color.White else Color(0xFF475569)
-                                    ),
-                                    shape = RoundedCornerShape(8.dp),
-                                    modifier = Modifier.weight(1f).height(40.dp),
-                                    contentPadding = PaddingValues(0.dp),
-                                    border = androidx.compose.foundation.BorderStroke(1.dp, if (isSelected) colorTheme else Color(0xFFE2E8F0))
-                                ) {
-                                    Text(name, fontWeight = FontWeight.Bold, fontSize = 12.sp)
-                                }
-                             }
-                        }
+                        // 反馈三选一 (立体卡纸按钮)
+                        ReviewOutcomeRow(
+                            selectedOutcome = selectedOutcome,
+                            onSelect = onSelectOutcome
+                        )
 
                         Spacer(modifier = Modifier.height(16.dp))
-                        Divider(color = Color(0xFFF1F5F9))
+                        HorizontalDivider(color = colors.rule)
                         Spacer(modifier = Modifier.height(16.dp))
 
                         // 掌握度修改
-                        Text("掌握程度评估", fontSize = 12.sp, color = Color(0xFF64748B), fontWeight = FontWeight.Bold)
+                        Text("掌握程度评估", fontSize = 13.5.sp, color = colors.textSecondary, fontWeight = FontWeight.Bold)
                         Spacer(modifier = Modifier.height(6.dp))
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(4.dp)
-                        ) {
-                            listOf(
-                                Triple("CLUELESS", "未掌握", Color(0xFFEF4444)),
-                                Triple("PARTIAL", "略微掌握", Color(0xFFF59E0B)),
-                                Triple("MASTERED", "熟练掌握", Color(0xFF10B981))
-                            ).forEach { (level, label, color) ->
-                                val isSelected = newMastery == level
-                                val emoji = when (level) {
-                                    "CLUELESS" -> "🔴"
-                                    "PARTIAL" -> "🟡"
-                                    else -> "🟢"
-                                }
-                                OutlinedButton(
-                                    onClick = { onMasteryChange(level) },
-                                    modifier = Modifier.weight(1f).height(38.dp),
-                                    shape = RoundedCornerShape(8.dp),
-                                    colors = ButtonDefaults.outlinedButtonColors(
-                                        containerColor = if (isSelected) color.copy(alpha = 0.15f) else Color.Transparent,
-                                        contentColor = if (isSelected) color else Color(0xFF475569)
-                                    ),
-                                    border = androidx.compose.foundation.BorderStroke(
-                                        width = if (isSelected) 1.5.dp else 1.dp,
-                                        color = if (isSelected) color else Color(0xFFE2E8F0)
-                                    ),
-                                    contentPadding = PaddingValues(horizontal = 2.dp, vertical = 4.dp)
-                                ) {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.Center
-                                    ) {
-                                        Text(emoji, fontSize = 11.sp)
-                                        Spacer(modifier = Modifier.width(2.dp))
-                                        Text(
-                                            text = label,
-                                            fontSize = 10.5.sp,
-                                            fontWeight = FontWeight.Bold
-                                        )
-                                    }
-                                }
-                            }
-                        }
+                        MasteryStampRow(
+                            selectedLevel = newMastery,
+                            onSelect = onMasteryChange
+                        )
 
                         Spacer(modifier = Modifier.height(14.dp))
 
                         // 难度星级修改
-                        Text("难度星级评估", fontSize = 12.sp, color = Color(0xFF64748B), fontWeight = FontWeight.Bold)
+                        Text("难度星级评估", fontSize = 13.5.sp, color = colors.textSecondary, fontWeight = FontWeight.Bold)
                         Spacer(modifier = Modifier.height(6.dp))
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Start,
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            (1..5).forEach { star ->
-                                Text(
-                                    text = "★",
-                                    fontSize = 28.sp,
-                                    color = if (star <= newStars) Color(0xFFF59E0B) else Color(0xFFcbd5e1),
-                                    modifier = Modifier
-                                        .clickable { onStarsChange(star.toDouble()) }
-                                        .padding(horizontal = 4.dp)
-                                )
-                            }
-                        }
+                        StarRatingStickerBar(
+                            stars = newStars.toInt(),
+                            onStarsChange = { onStarsChange(it.toDouble()) },
+                            starSize = 26.dp
+                        )
 
                         Spacer(modifier = Modifier.height(14.dp))
 
@@ -418,14 +380,14 @@ fun ReviewPracticeTabletContent(
                                 text = "纳入复习题库",
                                 fontSize = 13.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = Color(0xFF1E293B)
+                                color = colors.textPrimary
                             )
                             Switch(
                                 checked = !excludeFromReview,
                                 onCheckedChange = { onExcludeChange(!it) },
                                 colors = SwitchDefaults.colors(
-                                    checkedThumbColor = Color(0xFF4F46E5),
-                                    checkedTrackColor = Color(0xFF4F46E5).copy(alpha = 0.3f)
+                                    checkedThumbColor = colors.neonBlue,
+                                    checkedTrackColor = colors.neonBlue.copy(alpha = 0.3f)
                                 )
                             )
                         }
@@ -442,20 +404,20 @@ fun ReviewPracticeTabletContent(
                             OutlinedButton(
                                 onClick = { onSelectNote(currentIndex - 1) },
                                 enabled = currentIndex > 0,
-                                shape = RoundedCornerShape(8.dp),
+                                shape = RoundedCornerShape(10.dp),
                                 modifier = Modifier.weight(1f).height(44.dp),
                                 contentPadding = PaddingValues(horizontal = 4.dp),
-                                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFE2E8F0))
+                                border = androidx.compose.foundation.BorderStroke(1.dp, colors.edge)
                             ) {
-                                Text("上一题", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color(0xFF475569))
+                                Text("上一题", fontSize = 13.5.sp, fontWeight = FontWeight.Bold, color = colors.textSecondary)
                             }
                             
                             Button(
                                 onClick = onSubmit,
                                 enabled = selectedOutcome.isNotEmpty() && !submitting,
                                 modifier = Modifier.weight(2f).height(44.dp),
-                                shape = RoundedCornerShape(8.dp),
-                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4F46E5))
+                                shape = RoundedCornerShape(10.dp),
+                                colors = ButtonDefaults.buttonColors(containerColor = colors.neonBlue)
                             ) {
                                 if (submitting) {
                                     CircularProgressIndicator(color = Color.White, modifier = Modifier.size(20.dp))
@@ -463,7 +425,8 @@ fun ReviewPracticeTabletContent(
                                     Text(
                                         text = if (currentNote.is_completed) "更新打卡" else if (isLast) "提交完成" else "提交切题",
                                         fontWeight = FontWeight.Bold,
-                                        fontSize = 12.sp
+                                        fontSize = 13.5.sp,
+                                        color = Color.White
                                     )
                                 }
                             }
@@ -471,12 +434,12 @@ fun ReviewPracticeTabletContent(
                             OutlinedButton(
                                 onClick = { onSelectNote(currentIndex + 1) },
                                 enabled = currentIndex < session.target_count - 1,
-                                shape = RoundedCornerShape(8.dp),
+                                shape = RoundedCornerShape(10.dp),
                                 modifier = Modifier.weight(1f).height(44.dp),
                                 contentPadding = PaddingValues(horizontal = 4.dp),
-                                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFE2E8F0))
+                                border = androidx.compose.foundation.BorderStroke(1.dp, colors.edge)
                             ) {
-                                Text("下一题", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color(0xFF475569))
+                                Text("下一题", fontSize = 13.5.sp, fontWeight = FontWeight.Bold, color = colors.textSecondary)
                             }
                         }
                     }

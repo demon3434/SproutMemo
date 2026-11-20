@@ -24,7 +24,7 @@ class MainActivity : ComponentActivity() {
         com.sproutmemo.android.data.remote.NetworkProbeManager.init(applicationContext)
 
         setContent {
-            val themeId by tokenManager.themeIdFlow.collectAsState(initial = 8)
+            val themeId by tokenManager.themeIdFlow.collectAsState(initial = 18)
             SproutMemoTheme(themeId = themeId) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),

@@ -10,7 +10,7 @@
         class="tab-btn"
         :class="{ active: activeStageId === stage.id }"
       >
-        🎓 {{ stage.name }} 阶段
+        {{ stage.name }} 阶段
       </button>
     </div>
 
@@ -68,10 +68,10 @@
                   title="下移"
                 >▼</button>
                 <button class="btn-icon-sub" @click="handleToggleActive(mapping)" :title="mapping.is_active ? '停用' : '启用'">
-                  {{ mapping.is_active ? '🚫' : '✅' }}
+                  {{ mapping.is_active ? '停用' : '启用' }}
                 </button>
                 <button class="btn-icon-sub danger" @click="handleDelete(mapping)" title="删除关联">
-                  🗑️
+                  删除
                 </button>
               </div>
             </div>

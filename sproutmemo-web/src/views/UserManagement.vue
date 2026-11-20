@@ -51,7 +51,7 @@
               class="btn btn-secondary select-child-btn" 
               @click="showCreateChildModal = true"
             >
-              🔍 选择孩子 (已选 {{ selectedStudentIds.length }})
+              选择孩子 (已选 {{ selectedStudentIds.length }})
             </button>
           </div>
           
@@ -114,14 +114,14 @@
                   @click="handleEdit(u)" 
                   style="padding: 4px 8px; font-size: 12px; width: auto;"
                 >
-                  ✏️ 修改
+                  修改
                 </button>
                 <button 
                   class="btn btn-secondary" 
                   @click="handleResetPassword(u)" 
                   style="padding: 4px 8px; font-size: 12px; width: auto;"
                 >
-                  🔑 重置
+                  重置
                 </button>
                 <button 
                   v-if="u.role !== 'ADMIN'" 

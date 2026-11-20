@@ -71,16 +71,26 @@ defineEmits(['move', 'edit', 'toggle', 'delete']);
   align-items: center;
   justify-content: space-between;
   padding: 14px 18px;
-  background: var(--bg-main);
-  border: 1px solid var(--border);
+  background: var(--bg-card);
+  border: 2px solid var(--border);
+  border-left: 7px solid var(--primary);
   border-radius: var(--radius-md);
-  transition: var(--transition);
+  box-shadow: 0 3px 0 0 var(--color-edge);
+  transition: transform 0.14s ease, box-shadow 0.14s ease, border-color 0.14s ease;
+}
+
+.book-item-card:nth-child(3n+2) {
+  border-left-color: #f59e0b;
+}
+
+.book-item-card:nth-child(3n+3) {
+  border-left-color: #3b82f6;
 }
 
 .book-item-card:hover {
   border-color: var(--primary);
-  background: var(--bg-card);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 0 0 var(--color-edge);
 }
 
 .inactive-card {

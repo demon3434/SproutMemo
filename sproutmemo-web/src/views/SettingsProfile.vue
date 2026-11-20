@@ -1,7 +1,7 @@
 <template>
   <div class="profile-container" style="max-width: 600px; margin: 0 auto;">
     <div class="card">
-      <h3 class="card-title">👤 个人中心与账号设置</h3>
+      <h3 class="card-title">个人中心与账号设置</h3>
       <p class="card-subtitle">在此修改您的账户基本信息、安全密码与学期偏移配置。</p>
 
       <form @submit.prevent="handleSave">
@@ -55,7 +55,7 @@
             </div>
 
             <div class="current-sem-tip">
-              <span>📅 当前推算学期：</span>
+              <span>当前推算学期：</span>
               <strong>{{ computedSemester }}</strong>
             </div>
           </div>

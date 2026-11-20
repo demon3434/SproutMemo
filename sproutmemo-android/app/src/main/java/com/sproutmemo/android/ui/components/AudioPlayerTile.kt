@@ -72,12 +72,11 @@ fun AudioPlayerTile(
         return String.format("%02d:%02d", minutes, seconds)
     }
 
-    Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp)),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFF1F5F9)),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+    val colors = com.sproutmemo.android.ui.theme.LocalAppColors.current
+    StationeryCard(
+        containerColor = colors.paper2,
+        cornerRadius = 14.dp,
+        modifier = modifier.fillMaxWidth()
     ) {
         Row(
             modifier = Modifier
@@ -99,7 +98,7 @@ fun AudioPlayerTile(
                 modifier = Modifier.size(44.dp),
                 shape = RoundedCornerShape(22.dp),
                 contentPadding = PaddingValues(0.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4F46E5))
+                colors = ButtonDefaults.buttonColors(containerColor = colors.neonBlue)
             ) {
                 Text(
                     text = if (isPlaying) "⏸" else "▶",
@@ -116,9 +115,9 @@ fun AudioPlayerTile(
             ) {
                 Text(
                     text = title,
-                    fontSize = 13.sp,
+                    fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF1E293B),
+                    color = colors.textPrimary,
                     maxLines = 1
                 )
 
@@ -135,9 +134,9 @@ fun AudioPlayerTile(
                         valueRange = 0f..(if (duration > 0) duration.toFloat() else 100f),
                         modifier = Modifier.weight(1f),
                         colors = SliderDefaults.colors(
-                            thumbColor = Color(0xFF4F46E5),
-                            activeTrackColor = Color(0xFF4F46E5),
-                            inactiveTrackColor = Color(0xFFCBD5E1)
+                            thumbColor = colors.neonBlue,
+                            activeTrackColor = colors.neonBlue,
+                            inactiveTrackColor = colors.rule
                         )
                     )
 
@@ -145,7 +144,7 @@ fun AudioPlayerTile(
 
                     Text(
                         text = "${formatTime(currentPosition)} / ${formatTime(duration)}",
-                        fontSize = 11.sp,
+                        fontSize = 13.sp,
                         color = Color(0xFF64748B),
                         fontWeight = FontWeight.Medium
                     )

@@ -17,7 +17,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sproutmemo.android.data.remote.model.QuestionBookDto
 import com.sproutmemo.android.ui.theme.LocalAppColors
+import com.sproutmemo.android.ui.components.StationeryCard
+import com.sproutmemo.android.ui.components.StationeryIcon
 import com.sproutmemo.android.ui.components.StyledDropdown
+import com.sproutmemo.android.ui.components.gridPaper
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -71,23 +74,27 @@ fun BookManageScreen(viewModel: BookManageViewModel) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(colors.darkBg)
+            .gridPaper(colors.darkBg, colors.rule)
             .padding(16.dp)
     ) {
-        Text(
-            text = if (userRole == "PARENT") "📖 孩子的习题册" else "📖 我的习题册",
-            fontSize = 22.sp,
-            fontWeight = FontWeight.Bold,
-            color = colors.textPrimary
-        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            StationeryIcon(name = "book", size = 22.dp, tint = colors.neonBlue)
+            Text(
+                text = if (userRole == "PARENT") "孩子的习题册" else "我的习题册",
+                fontSize = 22.sp,
+                fontWeight = FontWeight.Bold,
+                color = colors.textPrimary
+            )
+        }
         Spacer(modifier = Modifier.height(12.dp))
 
         // 1. Parent Child Selector Card (Only shown for PARENT)
         if (userRole == "PARENT" && boundChildren.isNotEmpty()) {
-            Card(
-                shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(containerColor = colors.cardBg),
-                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+            StationeryCard(
+                cornerRadius = 14.dp,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Row(
@@ -158,7 +165,7 @@ fun BookManageScreen(viewModel: BookManageViewModel) {
             Spacer(modifier = Modifier.height(12.dp))
             if (subjects.isEmpty()) {
                 Text(
-                    text = "⚠️ 该学期暂未配置任何关联学科，请切换学期或联系管理员。",
+                    text = "该学期暂未配置任何关联学科，请切换学期或联系管理员。",
                     color = colors.neonAmber,
                     fontSize = 13.sp,
                     modifier = Modifier.padding(vertical = 8.dp)
@@ -190,7 +197,7 @@ fun BookManageScreen(viewModel: BookManageViewModel) {
                                             Text(
                                                 text = books.size.toString(),
                                                 color = Color.White,
-                                                fontSize = 9.sp,
+                                                fontSize = 13.5.sp,
                                                 fontWeight = FontWeight.Bold
                                             )
                                         }
@@ -223,14 +230,17 @@ fun BookManageScreen(viewModel: BookManageViewModel) {
         if (selectedSubjectId.isEmpty()) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Text(
-                    text = if (userRole == "PARENT") "💡 请选择学生、学期及学科以加载已存书柜" else "💡 请选择学期以及学科以加载我的书柜",
+                    text = if (userRole == "PARENT") "请选择学生、学期及学科以加载已存书柜" else "请选择学期以及学科以加载我的书柜",
                     color = colors.textSecondary,
                     fontSize = 14.sp
                 )
             }
         } else if (books.isEmpty()) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("📖 当前学科下暂无习题册，请在上方快速添加。", color = colors.textSecondary, fontSize = 14.sp)
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    StationeryIcon(name = "book", size = 16.dp, tint = colors.textSecondary)
+                    Text("当前学科下暂无习题册，请在上方快速添加。", color = colors.textSecondary, fontSize = 14.sp)
+                }
             }
         } else {
             LazyColumn(

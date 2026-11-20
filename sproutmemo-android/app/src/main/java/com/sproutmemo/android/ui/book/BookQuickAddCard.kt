@@ -10,6 +10,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.sproutmemo.android.ui.components.StationeryCard
+import com.sproutmemo.android.ui.components.StationeryIcon
 import com.sproutmemo.android.ui.theme.LocalAppColors
 
 @Composable
@@ -21,17 +23,17 @@ fun BookQuickAddCard(
 ) {
     val colors = LocalAppColors.current
 
-    Card(
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = colors.cardBg),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+    StationeryCard(
+        cornerRadius = 14.dp,
         modifier = Modifier.fillMaxWidth()
     ) {
         Column(modifier = Modifier.padding(12.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("📚 录入新习题册", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = colors.textPrimary)
+                StationeryIcon(name = "book", size = 16.dp, tint = colors.neonBlue)
+                Spacer(modifier = Modifier.width(6.dp))
+                Text("录入新习题册", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = colors.textPrimary)
                 Spacer(modifier = Modifier.width(4.dp))
-                Text("（将添加至当前学科）", fontSize = 11.sp, color = colors.textSecondary)
+                Text("（将添加至当前学科）", fontSize = 13.sp, color = colors.textSecondary)
             }
             Spacer(modifier = Modifier.height(8.dp))
             Row(
@@ -41,7 +43,7 @@ fun BookQuickAddCard(
                 OutlinedTextField(
                     value = bookName,
                     onValueChange = onBookNameChange,
-                    placeholder = { Text("习题册完整名称，如：《数学口算题卡》", fontSize = 12.sp) },
+                    placeholder = { Text("习题册完整名称，如：《数学口算题卡》", fontSize = 13.5.sp) },
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedTextColor = colors.textPrimary,
                         unfocusedTextColor = colors.textPrimary,
@@ -68,7 +70,7 @@ fun BookQuickAddCard(
                 Text(
                     text = addError,
                     color = colors.neonRed,
-                    fontSize = 12.sp,
+                    fontSize = 13.5.sp,
                     fontWeight = FontWeight.Bold
                 )
             }

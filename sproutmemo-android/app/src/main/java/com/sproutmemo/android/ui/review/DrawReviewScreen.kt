@@ -20,6 +20,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sproutmemo.android.data.remote.model.NoteDto
 import com.sproutmemo.android.data.remote.model.ReviewSessionDto
+import com.sproutmemo.android.ui.components.StationeryCard
+import com.sproutmemo.android.ui.components.StationeryIcon
+import com.sproutmemo.android.ui.components.StationeryPrimaryButton
+import com.sproutmemo.android.ui.components.gridPaper
+import com.sproutmemo.android.ui.theme.LocalAppColors
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -27,6 +32,7 @@ fun DrawReviewScreen(
     viewModel: ReviewViewModel,
     onStartPractice: (String) -> Unit
 ) {
+    val colors = LocalAppColors.current
     val reviewState by viewModel.reviewState.collectAsState()
     val loading by viewModel.loading.collectAsState()
 
@@ -65,8 +71,13 @@ fun DrawReviewScreen(
     if (activeSession != null) {
         AlertDialog(
             onDismissRequest = { /* Force user action, no outside click dismiss */ },
-            title = { Text("📋 发现未完成的复习", fontWeight = FontWeight.Bold) },
-            text = { Text("您上次有未完成的复习任务（共 ${activeSession?.target_count} 题，已完成 ${activeSession?.completed_count} 题），是否继续答题？") },
+            title = {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    StationeryIcon(name = "list", size = 18.dp, tint = colors.neonBlue)
+                    Text("发现未完成的复习", fontWeight = FontWeight.Bold, color = colors.textPrimary)
+                }
+            },
+            text = { Text("您上次有未完成的复习任务（共 ${activeSession?.target_count} 题，已完成 ${activeSession?.completed_count} 题），是否继续答题？", color = colors.textSecondary) },
             confirmButton = {
                 Button(
                     onClick = {
@@ -74,7 +85,7 @@ fun DrawReviewScreen(
                             viewModel.resumeSession(it)
                         }
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4F46E5))
+                    colors = ButtonDefaults.buttonColors(containerColor = colors.neonBlue)
                 ) {
                     Text("继续答题", color = Color.White)
                 }
@@ -87,16 +98,17 @@ fun DrawReviewScreen(
                         }
                     }
                 ) {
-                    Text("放弃并新建", color = Color(0xFFEF4444))
+                    Text("放弃并新建", color = colors.neonRed)
                 }
-            }
+            },
+            containerColor = colors.cardBg
         )
     }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFF8FAFC))
+            .gridPaper(colors.darkBg, colors.rule)
             .verticalScroll(rememberScrollState())
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -106,7 +118,13 @@ fun DrawReviewScreen(
                 .widthIn(max = 600.dp)
                 .fillMaxWidth()
         ) {
-            Text("🎯 抽题复习打卡", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1E293B))
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                StationeryIcon(name = "target", size = 22.dp, tint = colors.neonBlue)
+                Text("抽题复习打卡", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = colors.textPrimary)
+            }
             Spacer(modifier = Modifier.height(14.dp))
 
             when (val state = reviewState) {
@@ -115,14 +133,11 @@ fun DrawReviewScreen(
                         modifier = Modifier.fillMaxWidth(),
                         verticalArrangement = Arrangement.spacedBy(14.dp)
                     ) {
-                        Card(
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(16.dp),
-                            colors = CardDefaults.cardColors(containerColor = Color.White),
-                            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                        StationeryCard(
+                            modifier = Modifier.fillMaxWidth()
                         ) {
                             Column(modifier = Modifier.padding(16.dp)) {
-                                Text("抽题过滤条件", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = Color(0xFF4F46E5))
+                                Text("抽题过滤条件", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = colors.neonBlue)
                                 Spacer(modifier = Modifier.height(14.dp))
 
                                 // 第一排：学习阶段 & 学期 (横向并列)
@@ -223,17 +238,18 @@ fun DrawReviewScreen(
                                         onDismissRequest = { showStrategyHelp = false },
                                         title = {
                                             Text(
-                                                text = "💡 筛题策略含义说明",
+                                                text = "筛题策略含义说明",
                                                 fontWeight = FontWeight.Bold,
-                                                fontSize = 17.sp
+                                                fontSize = 17.sp,
+                                                color = colors.textPrimary
                                             )
                                         },
                                         text = {
                                             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                                                Text("• 听天由命: 纯随机从题库中抽取错题。", fontSize = 13.sp)
-                                                Text("• 艾宾浩斯: 基于艾宾浩斯遗忘曲线智能编排，优先抽取最需复习的错题。", fontSize = 13.sp)
-                                                Text("• 自我挑战: 挑选近期复习记录中错误率最高、难度最大的高阻错题进行突破训练。", fontSize = 13.sp)
-                                                Text("• 屡败屡战: 优先调度近期复习记录中连续出错且最难突破的顽固错题。", fontSize = 13.sp)
+                                                Text("• 听天由命: 纯随机从题库中抽取错题。", fontSize = 13.sp, color = colors.textSecondary)
+                                                Text("• 艾宾浩斯: 基于艾宾浩斯遗忘曲线智能编排，优先抽取最需复习的错题。", fontSize = 13.sp, color = colors.textSecondary)
+                                                Text("• 自我挑战: 挑选近期复习记录中错误率最高、难度最大的高阻错题进行突破训练。", fontSize = 13.sp, color = colors.textSecondary)
+                                                Text("• 屡败屡战: 优先调度近期复习记录中连续出错且最难突破的顽固错题。", fontSize = 13.sp, color = colors.textSecondary)
                                             }
                                         },
                                         confirmButton = {
@@ -242,16 +258,16 @@ fun DrawReviewScreen(
                                             }
                                         },
                                         shape = RoundedCornerShape(16.dp),
-                                        containerColor = Color.White
+                                        containerColor = colors.cardBg
                                     )
                                 }
 
                                 Spacer(modifier = Modifier.height(16.dp))
-                                HorizontalDivider(color = Color(0xFFF1F5F9))
+                                HorizontalDivider(color = colors.rule)
                                 Spacer(modifier = Modifier.height(16.dp))
 
                                 // 题量选择：换成 Choice Chips 胶囊选择器
-                                Text("选择复习题量", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Color(0xFF64748B))
+                                Text("选择复习题量", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = colors.textSecondary)
                                 Spacer(modifier = Modifier.height(8.dp))
                                 
                                 val countPresetOptions = presetsData?.count_presets?.map { preset ->
@@ -282,14 +298,14 @@ fun DrawReviewScreen(
                                             selected = isSelected,
                                             onClick = { viewModel.selectedCountPresetCode.value = code },
                                             label = {
-                                                Text("$displayName (${countVal}题)", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                                                Text("$displayName (${countVal}题)", fontSize = 13.5.sp, fontWeight = FontWeight.Bold)
                                             },
                                             shape = RoundedCornerShape(8.dp),
                                             colors = FilterChipDefaults.filterChipColors(
-                                                selectedContainerColor = Color(0xFF4F46E5).copy(alpha = 0.15f),
-                                                selectedLabelColor = Color(0xFF4F46E5),
-                                                containerColor = Color(0xFFF1F5F9),
-                                                labelColor = Color(0xFF475569)
+                                                selectedContainerColor = colors.neonBlue.copy(alpha = 0.15f),
+                                                selectedLabelColor = colors.neonBlue,
+                                                containerColor = colors.paper2,
+                                                labelColor = colors.textSecondary
                                             )
                                         )
                                     }
@@ -298,38 +314,43 @@ fun DrawReviewScreen(
                                 Spacer(modifier = Modifier.height(24.dp))
 
                                 val isSubmitEnabled = selectedSemesterId.isNotBlank()
-                                Button(
-                                    onClick = { viewModel.generatePreview() },
-                                    enabled = !loading && isSubmitEnabled,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(48.dp),
-                                    shape = RoundedCornerShape(12.dp),
-                                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4F46E5))
-                                ) {
-                                    if (loading) {
+                                if (loading) {
+                                    Button(
+                                        onClick = {},
+                                        enabled = false,
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(48.dp),
+                                        shape = RoundedCornerShape(14.dp),
+                                        colors = ButtonDefaults.buttonColors(containerColor = colors.neonBlue)
+                                    ) {
                                         CircularProgressIndicator(color = Color.White, modifier = Modifier.size(20.dp))
-                                    } else {
-                                        Text(
-                                            if (isSubmitEnabled) "🚀 确认抽取并生成大纲" else "⚠️ 请先选择学期",
-                                            fontWeight = FontWeight.Bold,
-                                            fontSize = 15.sp
-                                        )
                                     }
+                                } else {
+                                    StationeryPrimaryButton(
+                                        text = if (isSubmitEnabled) "确认抽取并生成大纲" else "请先选择学期",
+                                        iconName = if (isSubmitEnabled) "target" else null,
+                                        enabled = isSubmitEnabled,
+                                        onClick = { viewModel.generatePreview() },
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
                                 }
                             }
                         }
                     }
                 }
                 is ReviewState.Previewing -> {
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(16.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color.White),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                    StationeryCard(
+                        modifier = Modifier.fillMaxWidth()
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
-                            Text("📋 本次复习题目大纲 (共 ${state.notes.size} 题)", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1E293B))
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                StationeryIcon(name = "list", size = 18.dp, tint = colors.neonBlue)
+                                Text("本次复习题目大纲 (共 ${state.notes.size} 题)", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = colors.textPrimary)
+                            }
                             Spacer(modifier = Modifier.height(14.dp))
 
                             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -337,26 +358,30 @@ fun DrawReviewScreen(
                                     Row(
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .background(Color(0xFFF8FAFC), shape = RoundedCornerShape(8.dp))
+                                            .background(colors.paper2, shape = RoundedCornerShape(10.dp))
+                                            .border(1.dp, colors.rule, RoundedCornerShape(10.dp))
                                             .padding(horizontal = 12.dp, vertical = 10.dp),
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
-                                        Text("${idx + 1}.", fontWeight = FontWeight.Bold, color = Color(0xFF4F46E5), modifier = Modifier.width(28.dp), fontSize = 14.sp)
+                                        Text("${idx + 1}.", fontWeight = FontWeight.Bold, color = colors.neonBlue, modifier = Modifier.width(28.dp), fontSize = 14.sp)
                                         Column(modifier = Modifier.weight(1f)) {
                                             Text(
                                                 text = note.subject_name ?: "",
-                                                fontSize = 11.sp,
+                                                fontSize = 13.sp,
                                                 fontWeight = FontWeight.Bold,
-                                                color = Color(0xFF64748B)
+                                                color = colors.textSecondary
                                             )
                                             Text(
                                                 text = note.source_paper_name ?: note.question_source_name ?: "未命名错题",
                                                 fontSize = 13.sp,
                                                 fontWeight = FontWeight.Bold,
-                                                color = Color(0xFF1E293B)
+                                                color = colors.textPrimary
                                             )
                                         }
-                                        Text("★ ${note.difficulty_stars.toInt()}", fontSize = 13.sp, color = Color(0xFFF59E0B), fontWeight = FontWeight.Bold)
+                                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(3.dp)) {
+                                            StationeryIcon(name = "star-filled", size = 14.dp, tint = colors.neonAmber)
+                                            Text("${note.difficulty_stars.toInt()}", fontSize = 13.sp, color = colors.neonAmber, fontWeight = FontWeight.Bold)
+                                        }
                                     }
                                 }
                             }
@@ -366,19 +391,21 @@ fun DrawReviewScreen(
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             Button(
                                 onClick = { viewModel.startFormalSession(state.notes) },
-                                modifier = Modifier.weight(1.5f).height(44.dp),
-                                shape = RoundedCornerShape(12.dp),
-                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF10B981))
+                                modifier = Modifier.weight(1.5f).height(46.dp),
+                                shape = RoundedCornerShape(14.dp),
+                                colors = ButtonDefaults.buttonColors(containerColor = colors.neonGreen)
                             ) {
-                                Text("✍️ 开始答题", fontWeight = FontWeight.Bold, color = Color.White)
+                                StationeryIcon(name = "pen", size = 16.dp, tint = Color.White)
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text("开始答题", fontWeight = FontWeight.Bold, color = Color.White)
                             }
 
                             OutlinedButton(
                                 onClick = { viewModel.resetReview() },
-                                modifier = Modifier.weight(1f).height(44.dp),
-                                shape = RoundedCornerShape(12.dp)
+                                modifier = Modifier.weight(1f).height(46.dp),
+                                shape = RoundedCornerShape(14.dp)
                             ) {
-                                Text("重新选择")
+                                Text("重新选择", color = colors.textPrimary)
                             }
                         }
                     }
@@ -389,36 +416,34 @@ fun DrawReviewScreen(
                     modifier = Modifier.fillMaxWidth().height(200.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    CircularProgressIndicator(color = Color(0xFF4F46E5))
+                    CircularProgressIndicator(color = colors.neonBlue)
                 }
             }
             is ReviewState.Completed -> {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White)
+                StationeryCard(
+                    modifier = Modifier.fillMaxWidth()
                 ) {
                     Column(
                         modifier = Modifier.padding(32.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Text("🏆 恭喜！完成本次复习打卡！", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color(0xFF10B981))
+                        StationeryIcon(name = "mastery-mastered", size = 40.dp, tint = colors.neonGreen)
+                        Spacer(modifier = Modifier.height(10.dp))
+                        Text("恭喜！完成本次复习打卡！", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = colors.neonGreen)
                         Spacer(modifier = Modifier.height(12.dp))
                         Text(
                             text = "本次共完成 ${state.session.target_count} 道题目复习打卡，复习轨迹已存入数据库。",
-                            color = Color(0xFF64748B),
+                            color = colors.textSecondary,
                             fontSize = 13.sp,
                             textAlign = androidx.compose.ui.text.style.TextAlign.Center
                         )
                         Spacer(modifier = Modifier.height(24.dp))
-                        Button(
+                        StationeryPrimaryButton(
+                            text = "再次抽题复习",
+                            iconName = "target",
                             onClick = { viewModel.resetReview() },
-                            modifier = Modifier.fillMaxWidth().height(44.dp),
-                            shape = RoundedCornerShape(12.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4F46E5))
-                        ) {
-                            Text("🔄 再次抽题复习", fontWeight = FontWeight.Bold)
-                        }
+                            modifier = Modifier.fillMaxWidth()
+                        )
                     }
                 }
             }
@@ -427,45 +452,3 @@ fun DrawReviewScreen(
 }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun ReviewFilterDropdown(
-    label: String,
-    selectedValue: String,
-    options: List<Pair<String, String>>,
-    onSelected: (String) -> Unit
-) {
-    var expanded by remember { mutableStateOf(false) }
-    val displayLabel = options.find { it.first == selectedValue }?.second ?: "全部"
-
-    ExposedDropdownMenuBox(
-        expanded = expanded,
-        onExpandedChange = { expanded = !expanded },
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        OutlinedTextField(
-            value = displayLabel,
-            onValueChange = {},
-            readOnly = true,
-            label = { Text(label) },
-            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-            colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
-            modifier = Modifier.menuAnchor().fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp)
-        )
-        ExposedDropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false }
-        ) {
-            options.forEach { opt ->
-                DropdownMenuItem(
-                    text = { Text(opt.second) },
-                    onClick = {
-                        onSelected(opt.first)
-                        expanded = false
-                    }
-                )
-            }
-        }
-    }
-}

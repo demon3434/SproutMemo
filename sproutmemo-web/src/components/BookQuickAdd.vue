@@ -1,7 +1,7 @@
 <template>
   <div class="quick-add-section">
     <div class="section-title-row">
-      <span class="icon">📚</span>
+      <span class="icon"><AppIcon name="book" :size="18" /></span>
       <h3 class="title">录入新习题册</h3>
       <span class="subtitle">（将添加至当前所选学科）</span>
     </div>
@@ -26,6 +26,7 @@
 
 <script setup>
 import { ref } from 'vue';
+import AppIcon from './AppIcon.vue';
 
 defineProps({
   error: {

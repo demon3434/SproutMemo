@@ -14,6 +14,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sproutmemo.android.data.remote.model.UserDto
+import com.sproutmemo.android.ui.components.StationeryIcon
+import com.sproutmemo.android.ui.components.gridPaper
 import com.sproutmemo.android.ui.theme.LocalAppColors
 
 @Composable
@@ -32,7 +34,7 @@ fun DashboardScreen(viewModel: DashboardViewModel) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(colors.darkBg)
+            .gridPaper(colors.darkBg, colors.rule)
             .padding(16.dp)
             .verticalScroll(scrollState)
     ) {
@@ -45,15 +47,21 @@ fun DashboardScreen(viewModel: DashboardViewModel) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column {
-                Text(
-                    text = "🌱 学习复习看板",
-                    fontSize = 22.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = colors.textPrimary
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    StationeryIcon(name = "sprout", size = 24.dp, tint = colors.neonBlue)
+                    Text(
+                        text = "学习复习看板",
+                        fontSize = 22.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = colors.textPrimary
+                    )
+                }
                 Text(
                     text = if (userRole == "PARENT") "监控关联孩子的复习进度与掌握情况" else "我的错题库与复习数据分析",
-                    fontSize = 12.sp,
+                    fontSize = 13.5.sp,
                     color = colors.textSecondary
                 )
             }
@@ -67,13 +75,16 @@ fun DashboardScreen(viewModel: DashboardViewModel) {
                         shape = RoundedCornerShape(20.dp),
                         colors = ButtonDefaults.outlinedButtonColors(containerColor = colors.cardBg)
                     ) {
+                        StationeryIcon(name = "child", size = 15.dp, tint = colors.neonBlue)
+                        Spacer(modifier = Modifier.width(6.dp))
                         Text(
-                            text = "👶 ${currentChild.nickname ?: currentChild.username}",
+                            text = currentChild.nickname ?: currentChild.username,
                             fontSize = 13.sp,
                             fontWeight = FontWeight.Bold,
                             color = colors.neonBlue
                         )
-                        Text(" ▼", fontSize = 10.sp, color = colors.textSecondary)
+                        Spacer(modifier = Modifier.width(4.dp))
+                        StationeryIcon(name = "chevron-down", size = 13.dp, tint = colors.textSecondary)
                     }
 
                     DropdownMenu(

@@ -58,7 +58,7 @@ export function showConfirm(message, title = '确认操作') {
     overlay.innerHTML = `
       <div class="custom-dialog-box">
         <div class="custom-dialog-header">
-          <span class="custom-dialog-icon">❓</span>
+          <span class="custom-dialog-icon" style="display:inline-flex; align-items:center; color:var(--primary);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.5a2.5 2.5 0 0 1 4.9.7c0 1.7-2.5 2.2-2.5 3.6"/><circle cx="12" cy="17" r="1" fill="currentColor" stroke="none"/></svg></span>
           <span class="custom-dialog-title">${title}</span>
         </div>
         <div class="custom-dialog-body">${message}</div>
@@ -111,7 +111,7 @@ export function showThreeButtonConfirm(message, title = '确认操作') {
     overlay.innerHTML = `
       <div class="custom-dialog-box" style="max-width: 460px;">
         <div class="custom-dialog-header">
-          <span class="custom-dialog-icon">❓</span>
+          <span class="custom-dialog-icon" style="display:inline-flex; align-items:center; color:var(--primary);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.5a2.5 2.5 0 0 1 4.9.7c0 1.7-2.5 2.2-2.5 3.6"/><circle cx="12" cy="17" r="1" fill="currentColor" stroke="none"/></svg></span>
           <span class="custom-dialog-title">${title}</span>
         </div>
         <div class="custom-dialog-body">${message}</div>
@@ -162,7 +162,7 @@ export function showPrompt(message, defaultValue = '', title = '输入信息') {
     overlay.innerHTML = `
       <div class="custom-dialog-box">
         <div class="custom-dialog-header">
-          <span class="custom-dialog-icon">✏️</span>
+          <span class="custom-dialog-icon" style="display:inline-flex; align-items:center; color:var(--primary);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></span>
           <span class="custom-dialog-title">${title}</span>
         </div>
         <div class="custom-dialog-body" style="display: flex; flex-direction: column; gap: 12px;">

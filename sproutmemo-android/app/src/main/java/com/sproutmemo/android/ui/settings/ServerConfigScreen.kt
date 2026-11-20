@@ -19,6 +19,9 @@ import com.sproutmemo.android.data.local.TokenManager
 import com.sproutmemo.android.data.remote.ApiClient
 import com.sproutmemo.android.data.remote.NetworkProbe
 import com.sproutmemo.android.data.remote.NsdHelper
+import com.sproutmemo.android.ui.components.StationeryCard
+import com.sproutmemo.android.ui.components.StationeryIcon
+import com.sproutmemo.android.ui.components.gridPaper
 import com.sproutmemo.android.ui.theme.LocalAppColors
 import kotlinx.coroutines.launch
 
@@ -46,22 +49,21 @@ fun ServerConfigScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(colors.darkBg)
+            .gridPaper(colors.darkBg, colors.rule)
             .padding(16.dp)
             .verticalScroll(rememberScrollState())
     ) {
         // Header
         Row(
             verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
         ) {
-            Text("⚙️ 配置服务地址", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = colors.textPrimary)
+            StationeryIcon(name = "settings", size = 20.dp, tint = colors.neonBlue)
+            Text("配置服务地址", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = colors.textPrimary)
         }
 
-        Card(
-            shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = colors.cardBg),
-            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        StationeryCard(
             modifier = Modifier.fillMaxWidth()
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
@@ -100,19 +102,19 @@ fun ServerConfigScreen(
                     onClick = {
                         scope.launch {
                             isDiscovering = true
-                            testResult = "⏳ 正在扫描局域网 SproutMemo 服务 (mDNS)..."
+                            testResult = "正在扫描局域网 SproutMemo 服务 (mDNS)..."
                             try {
                                 val found = NsdHelper.discoverServer(context, timeoutMs = 5000)
                                 if (!found.isNullOrBlank()) {
                                     intranetUrl = found
-                                    testResult = "✅ 成功扫描到局域网服务：$found (已填入文本框)"
-                                    Toast.makeText(context, "📡 成功扫描到内网服务并已填入", Toast.LENGTH_SHORT).show()
+                                    testResult = "成功扫描到局域网服务：$found (已填入文本框)"
+                                    Toast.makeText(context, "成功扫描到内网服务并已填入", Toast.LENGTH_SHORT).show()
                                 } else {
-                                    testResult = "❌ 未在局域网内扫描到 SproutMemo 服务 (mDNS)，请确认手机与服务端处于同一 Wi-Fi 网络"
+                                    testResult = "未在局域网内扫描到 SproutMemo 服务 (mDNS)，请确认手机与服务端处于同一 Wi-Fi 网络"
                                     Toast.makeText(context, "未扫描到局域网服务", Toast.LENGTH_SHORT).show()
                                 }
                             } catch (e: Exception) {
-                                testResult = "❌ mDNS 扫描异常: ${e.localizedMessage}"
+                                testResult = "mDNS 扫描异常: ${e.localizedMessage}"
                             } finally {
                                 isDiscovering = false
                             }
@@ -130,9 +132,11 @@ fun ServerConfigScreen(
                             color = colors.neonBlue
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("正在扫描局域网 SproutMemo 服务 (mDNS)...", fontSize = 12.sp)
+                        Text("正在扫描局域网 SproutMemo 服务 (mDNS)...", fontSize = 13.5.sp)
                     } else {
-                        Text("📡 内网自动发现 (mDNS)", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                        StationeryIcon(name = "link", size = 14.dp, tint = colors.neonBlue)
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text("内网自动发现 (mDNS)", fontSize = 13.5.sp, fontWeight = FontWeight.Bold)
                     }
                 }
 
@@ -155,7 +159,7 @@ fun ServerConfigScreen(
                         text = testResult,
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Bold,
-                        color = if (testResult.contains("✅")) Color(0xFF10B981) else Color(0xFFEF4444)
+                        color = if (testResult.contains("成功")) colors.neonGreen else colors.neonRed
                     )
                 }
 
@@ -168,11 +172,11 @@ fun ServerConfigScreen(
                     OutlinedButton(
                         onClick = {
                             if (intranetUrl.isBlank() && extranetUrl.isBlank()) {
-                                testResult = "⚠️ 请输入至少一个服务地址"
+                                testResult = "请输入至少一个服务地址"
                                 return@OutlinedButton
                             }
                             testing = true
-                            testResult = "⏳ 正在测试连通性..."
+                            testResult = "正在测试连通性..."
                             scope.launch {
                                 val intraOk = if (intranetUrl.isNotBlank()) NetworkProbe.probeUrl(intranetUrl) else false
                                 val extraOk = if (extranetUrl.isNotBlank()) NetworkProbe.probeUrl(extranetUrl) else false
@@ -180,11 +184,11 @@ fun ServerConfigScreen(
                                 
                                 val sb = java.lang.StringBuilder()
                                 if (intranetUrl.isNotBlank()) {
-                                    sb.append("内网: ").append(if (intraOk) "✅ 连通成功" else "❌ 连通失败")
+                                    sb.append("内网: ").append(if (intraOk) "连通成功" else "连通失败")
                                 }
                                 if (extranetUrl.isNotBlank()) {
                                     if (sb.isNotEmpty()) sb.append("\n")
-                                    sb.append("外网: ").append(if (extraOk) "✅ 连通成功" else "❌ 连通失败")
+                                    sb.append("外网: ").append(if (extraOk) "连通成功" else "连通失败")
                                 }
                                 testResult = sb.toString()
                             }
@@ -203,7 +207,7 @@ fun ServerConfigScreen(
                                 val active = if (intranetUrl.isNotBlank()) intranetUrl else extranetUrl
                                 tokenManager.saveServerUrls(intranetUrl, extranetUrl, active)
                                 com.sproutmemo.android.data.remote.NetworkProbeManager.probeAndSelectBestUrl(context)
-                                Toast.makeText(context, "💾 配置已保存", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, "配置已保存", Toast.LENGTH_SHORT).show()
                                 onBack()
                             }
                         },

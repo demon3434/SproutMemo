@@ -1,6 +1,7 @@
 package com.sproutmemo.android.ui.auth
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -11,7 +12,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -19,6 +19,12 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.sproutmemo.android.ui.components.StationeryCard
+import com.sproutmemo.android.ui.components.StationeryIcon
+import com.sproutmemo.android.ui.components.StationeryPrimaryButton
+import com.sproutmemo.android.ui.components.StationeryWashiTape
+import com.sproutmemo.android.ui.components.gridPaper
+import com.sproutmemo.android.ui.theme.LocalAppColors
 
 @Composable
 fun LoginScreen(
@@ -27,6 +33,7 @@ fun LoginScreen(
 ) {
     val configuration = LocalConfiguration.current
     val isTablet = remember(configuration) { configuration.screenWidthDp >= 600 }
+    val colors = LocalAppColors.current
 
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -55,208 +62,228 @@ fun LoginScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(
-                brush = Brush.verticalGradient(
-                    colors = listOf(Color(0xFF4F46E5), Color(0xFF0EA5E9))
-                )
-            )
+            .gridPaper(colors.darkBg, colors.rule)
             .statusBarsPadding()
             .navigationBarsPadding()
             .imePadding(),
         contentAlignment = Alignment.Center
     ) {
-        Card(
+        Box(
             modifier = if (isTablet) {
                 Modifier
                     .fillMaxWidth(0.9f)
                     .widthIn(max = 460.dp)
                     .padding(16.dp)
-                    .verticalScroll(rememberScrollState())
             } else {
                 Modifier
                     .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 16.dp, vertical = 20.dp)
             },
-            shape = if (isTablet) RoundedCornerShape(24.dp) else RoundedCornerShape(0.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White),
-            elevation = CardDefaults.cardElevation(defaultElevation = if (isTablet) 12.dp else 0.dp)
+            contentAlignment = Alignment.Center
         ) {
-            Column(
+            StationeryCard(
                 modifier = Modifier
-                    .padding(
-                        horizontal = if (isTablet) 28.dp else 20.dp,
-                        vertical = if (isTablet) 28.dp else 36.dp
-                    )
-                    .fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState()),
+                cornerRadius = 22.dp
             ) {
-                Text(
-                    text = "🌱 知拾 SproutMemo",
-                    fontSize = 26.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF1E293B)
-                )
-                Text(
-                    text = "错题复习与学习管理系统",
-                    fontSize = 13.sp,
-                    color = Color(0xFF64748B),
-                    modifier = Modifier.padding(top = 4.dp, bottom = 20.dp)
-                )
-
-                OutlinedTextField(
-                    value = username,
-                    onValueChange = { username = it },
-                    label = { Text("用户名 / 账号") },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
-                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
-                )
-
-                Spacer(modifier = Modifier.height(14.dp))
-
-                OutlinedTextField(
-                    value = password,
-                    onValueChange = { password = it },
-                    label = { Text("密码") },
-                    singleLine = true,
-                    visualTransformation = PasswordVisualTransformation(),
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
-                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done)
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Server Configuration Toggle Header
-                Row(
+                Column(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { showServerConfig = !showServerConfig }
-                        .padding(vertical = 6.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                        .padding(
+                            horizontal = if (isTablet) 28.dp else 20.dp,
+                            vertical = if (isTablet) 28.dp else 28.dp
+                        )
+                        .fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Text(
-                        text = "⚙️ 服务器内外网 URL 配置",
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFF4F46E5)
-                    )
-                    Text(
-                        text = if (showServerConfig) "▲ 折叠" else "▼ 展开设置",
-                        fontSize = 12.sp,
-                        color = Color(0xFF64748B)
-                    )
-                }
-
-                if (showServerConfig) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(Color(0xFFF8FAFC), shape = RoundedCornerShape(12.dp))
-                            .padding(12.dp)
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
-                        OutlinedTextField(
-                            value = intranetInput,
-                            onValueChange = { intranetInput = it },
-                            label = { Text("内网 URL (LAN)") },
-                            placeholder = { Text("例如 http://192.168.1.100:8080") },
-                            singleLine = true,
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(8.dp)
-                        )
-
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        OutlinedTextField(
-                            value = extranetInput,
-                            onValueChange = { extranetInput = it },
-                            label = { Text("外网 URL (WAN)") },
-                            placeholder = { Text("例如 https://sproutmemo.zip") },
-                            singleLine = true,
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(8.dp)
-                        )
-
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        OutlinedButton(
-                            onClick = {
-                                viewModel.discoverLanServer(
-                                    onDiscovered = { url ->
-                                        intranetInput = url
-                                        infoMessage = "成功扫描到局域网 SproutMemo 服务器：\n$url"
-                                    },
-                                    onError = { err ->
-                                        errorMessage = err
-                                    }
-                                )
-                            },
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(8.dp),
-                            enabled = !isDiscovering
-                        ) {
-                            if (isDiscovering) {
-                                CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
-                                Spacer(modifier = Modifier.width(6.dp))
-                                Text("正在扫描局域网 SproutMemo 服务 (mDNS)...", fontSize = 12.sp)
-                            } else {
-                                Text("📡 自动扫描局域网服务 (mDNS)", fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                            }
-                        }
-
-                        Spacer(modifier = Modifier.height(6.dp))
+                        StationeryIcon(name = "sprout", size = 28.dp, tint = colors.neonBlue)
                         Text(
-                            text = "💡 说明：登录时优先探测内网；若内网不通，自动切换降级至外网 URL。",
-                            fontSize = 11.sp,
-                            color = Color(0xFF64748B)
+                            text = "知拾 SproutMemo",
+                            fontSize = 26.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = colors.textPrimary
                         )
                     }
-                }
-
-                if (activeServerUrl.isNotBlank()) {
                     Text(
-                        text = "当前激活地址: $activeServerUrl",
-                        fontSize = 11.sp,
-                        color = Color(0xFF10B981),
-                        fontWeight = FontWeight.SemiBold,
-                        modifier = Modifier.padding(top = 8.dp)
+                        text = "错题复习与学习管理系统",
+                        fontSize = 13.sp,
+                        color = colors.textSecondary,
+                        modifier = Modifier.padding(top = 4.dp, bottom = 20.dp)
                     )
-                }
 
-                Spacer(modifier = Modifier.height(24.dp))
+                    OutlinedTextField(
+                        value = username,
+                        onValueChange = { username = it },
+                        label = { Text("用户名 / 账号") },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
+                    )
 
-                Button(
-                    onClick = {
-                        viewModel.login(username, password, intranetInput, extranetInput)
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(50.dp),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4F46E5)),
-                    enabled = authState !is AuthState.Loading
-                ) {
-                    if (authState is AuthState.Loading) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            CircularProgressIndicator(
-                                color = Color.White,
-                                modifier = Modifier.size(20.dp),
-                                strokeWidth = 2.dp
+                    Spacer(modifier = Modifier.height(14.dp))
+
+                    OutlinedTextField(
+                        value = password,
+                        onValueChange = { password = it },
+                        label = { Text("密码") },
+                        singleLine = true,
+                        visualTransformation = PasswordVisualTransformation(),
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done)
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // Server Configuration Toggle Header
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { showServerConfig = !showServerConfig }
+                            .padding(vertical = 6.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            StationeryIcon(name = "settings", size = 15.dp, tint = colors.neonBlue)
+                            Text(
+                                text = "服务器内外网 URL 配置",
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = colors.neonBlue
                             )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text("正在探测网络并登录...", fontSize = 14.sp)
+                        }
+                        Text(
+                            text = if (showServerConfig) "收起" else "展开设置",
+                            fontSize = 13.5.sp,
+                            color = colors.textSecondary
+                        )
+                    }
+
+                    if (showServerConfig) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(colors.paper2, shape = RoundedCornerShape(12.dp))
+                                .border(1.dp, colors.rule, RoundedCornerShape(12.dp))
+                                .padding(12.dp)
+                        ) {
+                            OutlinedTextField(
+                                value = intranetInput,
+                                onValueChange = { intranetInput = it },
+                                label = { Text("内网 URL (LAN)") },
+                                placeholder = { Text("例如 http://192.168.1.100:8080") },
+                                singleLine = true,
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(8.dp)
+                            )
+
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            OutlinedTextField(
+                                value = extranetInput,
+                                onValueChange = { extranetInput = it },
+                                label = { Text("外网 URL (WAN)") },
+                                placeholder = { Text("例如 https://sproutmemo.zip") },
+                                singleLine = true,
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(8.dp)
+                            )
+
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            OutlinedButton(
+                                onClick = {
+                                    viewModel.discoverLanServer(
+                                        onDiscovered = { url ->
+                                            intranetInput = url
+                                            infoMessage = "成功扫描到局域网 SproutMemo 服务器：\n$url"
+                                        },
+                                        onError = { err ->
+                                            errorMessage = err
+                                        }
+                                    )
+                                },
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(10.dp),
+                                enabled = !isDiscovering
+                            ) {
+                                if (isDiscovering) {
+                                    CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Text("正在扫描局域网 SproutMemo 服务 (mDNS)...", fontSize = 13.5.sp)
+                                } else {
+                                    StationeryIcon(name = "link", size = 14.dp, tint = colors.neonBlue)
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Text("自动扫描局域网服务 (mDNS)", fontSize = 13.5.sp, fontWeight = FontWeight.Bold)
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(6.dp))
+                            Text(
+                                text = "说明：登录时优先探测内网；若内网不通，自动切换降级至外网 URL。",
+                                fontSize = 13.sp,
+                                color = colors.textSecondary
+                            )
+                        }
+                    }
+
+                    if (activeServerUrl.isNotBlank()) {
+                        Text(
+                            text = "当前激活地址: $activeServerUrl",
+                            fontSize = 13.sp,
+                            color = colors.neonGreen,
+                            fontWeight = FontWeight.SemiBold,
+                            modifier = Modifier.padding(top = 8.dp)
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    if (authState is AuthState.Loading) {
+                        Button(
+                            onClick = {},
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(50.dp),
+                            shape = RoundedCornerShape(14.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = colors.neonBlue),
+                            enabled = false
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                CircularProgressIndicator(
+                                    color = Color.White,
+                                    modifier = Modifier.size(20.dp),
+                                    strokeWidth = 2.dp
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text("正在探测网络并登录...", fontSize = 14.sp, color = Color.White)
+                            }
                         }
                     } else {
-                        Text(
+                        StationeryPrimaryButton(
                             text = "登 录",
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold
+                            onClick = {
+                                viewModel.login(username, password, intranetInput, extranetInput)
+                            },
+                            modifier = Modifier.fillMaxWidth()
                         )
                     }
                 }
             }
+            StationeryWashiTape(
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .offset(y = (-6).dp)
+            )
         }
     }
 
@@ -270,13 +297,13 @@ fun LoginScreen(
                 }
             },
             title = {
-                Text(text = "提示信息", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                Text(text = "提示信息", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = colors.textPrimary)
             },
             text = {
-                Text(text = errorMessage ?: "", fontSize = 14.sp, color = Color(0xFF334155))
+                Text(text = errorMessage ?: "", fontSize = 14.sp, color = colors.textSecondary)
             },
             shape = RoundedCornerShape(16.dp),
-            containerColor = Color.White
+            containerColor = colors.cardBg
         )
     }
 
@@ -290,13 +317,13 @@ fun LoginScreen(
                 }
             },
             title = {
-                Text(text = "自动发现成功", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = Color(0xFF10B981))
+                Text(text = "自动发现成功", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = colors.neonGreen)
             },
             text = {
-                Text(text = infoMessage ?: "", fontSize = 14.sp, color = Color(0xFF334155))
+                Text(text = infoMessage ?: "", fontSize = 14.sp, color = colors.textSecondary)
             },
             shape = RoundedCornerShape(16.dp),
-            containerColor = Color.White
+            containerColor = colors.cardBg
         )
     }
 }

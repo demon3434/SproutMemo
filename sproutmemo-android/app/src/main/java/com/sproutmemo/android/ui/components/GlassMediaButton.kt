@@ -17,14 +17,15 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.sproutmemo.android.ui.theme.AppIconsMap
 import com.sproutmemo.android.ui.theme.LocalAppColors
+import com.sproutmemo.android.ui.theme.SproutTextScale
 
 /**
- * 媒体附件区域带光晕效果的功能按钮组件，支持按下动画及禁用态样式。
+ * 媒体附件区域手账风格功能按钮组件，支持按下动画及禁用态样式。
  */
 @Composable
 fun GlassMediaButton(
@@ -40,10 +41,7 @@ fun GlassMediaButton(
 ) {
     val appColors = LocalAppColors.current
     val resolvedTextColor = if (isLight && !appColors.isDark && textColor == Color.White) {
-        val r = (glowColor.red * 0.55f).coerceIn(0f, 1f)
-        val g = (glowColor.green * 0.55f).coerceIn(0f, 1f)
-        val b = (glowColor.blue * 0.55f).coerceIn(0f, 1f)
-        Color(r, g, b, 1f)
+        appColors.accentDeep
     } else {
         textColor
     }
@@ -55,26 +53,26 @@ fun GlassMediaButton(
         label = "scale"
     )
 
+    val contentTint = if (enabled) resolvedTextColor else secondaryColor.copy(alpha = 0.5f)
+
     Box(
         modifier = modifier
             .graphicsLayer(scaleX = scale, scaleY = scale)
             .clip(RoundedCornerShape(12.dp))
             .background(
                 if (isLight) {
-                    if (enabled) glowColor.copy(alpha = 0.22f) else glowColor.copy(alpha = 0.08f)
+                    if (enabled) appColors.neonBlue.copy(alpha = 0.14f) else appColors.paper2.copy(alpha = 0.5f)
                 } else {
-                    if (enabled) Color.White.copy(alpha = 0.06f) else Color.White.copy(alpha = 0.02f)
+                    if (enabled) appColors.paper2 else appColors.paper2.copy(alpha = 0.45f)
                 }
             )
             .border(
                 width = 1.dp,
-                brush = Brush.linearGradient(
-                    colors = if (enabled) {
-                        listOf(glowColor.copy(alpha = 0.8f), glowColor.copy(alpha = 0.35f), glowColor.copy(alpha = 0.6f))
-                    } else {
-                        listOf(Color.Gray.copy(alpha = 0.35f), Color.Gray.copy(alpha = 0.12f))
-                    }
-                ),
+                color = if (enabled) {
+                    if (isLight) appColors.neonBlue.copy(alpha = 0.45f) else appColors.edge
+                } else {
+                    appColors.rule
+                },
                 shape = RoundedCornerShape(12.dp)
             )
             .clickable(
@@ -84,22 +82,25 @@ fun GlassMediaButton(
             ) {
                 onClick()
             }
-            .padding(horizontal = 4.dp),
+            .padding(horizontal = 8.dp),
         contentAlignment = Alignment.Center
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
         ) {
-            Text(text = icon, fontSize = 16.sp)
+            if (icon in AppIconsMap) {
+                StationeryIcon(name = icon, size = 18.dp, tint = contentTint)
+            } else {
+                Text(text = icon, fontSize = 16.sp)
+            }
             Spacer(modifier = Modifier.width(6.dp))
             Text(
                 text = text,
-                color = if (enabled) resolvedTextColor else secondaryColor.copy(alpha = 0.5f),
-                fontSize = 11.sp,
+                color = contentTint,
+                fontSize = SproutTextScale.Button,
                 fontWeight = FontWeight.Bold,
-                maxLines = 1,
-                fontFamily = FontFamily.Monospace
+                maxLines = 1
             )
         }
     }

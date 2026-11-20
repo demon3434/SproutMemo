@@ -1,0 +1,25 @@
+{
+  "fontFamily": {
+    "display": ["Nunito", "LXGW WenKai Lite"],
+    "androidRes": "lxgw_wenkai_lite_regular"
+  },
+  "web": {
+    "xs": "0.875rem",
+    "sm": "0.9375rem",
+    "md": "1.0625rem",
+    "lg": "1.3125rem",
+    "xl": "1.5625rem",
+    "title": "clamp(1.25rem, 0.75vw + 0.875rem, 1.625rem)"
+  },
+  "android": {
+    "pageTitle": 22,
+    "sectionTitle": 16,
+    "cardTitle": 16,
+    "body": 15.5,
+    "label": 14,
+    "button": 14.5,
+    "caption": 13,
+    "badge": 12
+  }
+}
+

@@ -2,6 +2,7 @@ package com.sproutmemo.android.ui.note
 
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -15,15 +16,26 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import coil.compose.AsyncImage
+import com.sproutmemo.android.data.remote.ApiClient
 import com.sproutmemo.android.data.remote.model.NoteDto
 import com.sproutmemo.android.ui.components.NoteImageLightboxDialog
+import com.sproutmemo.android.ui.components.StarRatingStickerBar
+import com.sproutmemo.android.ui.components.StationeryCard
+import com.sproutmemo.android.ui.components.StationeryIcon
+import com.sproutmemo.android.ui.components.StationeryWashiTape
+import com.sproutmemo.android.ui.components.gridPaper
 import com.sproutmemo.android.ui.theme.LocalAppColors
 import kotlinx.coroutines.launch
 
@@ -49,8 +61,8 @@ fun NoteListScreen(
     }
 
     if (isTabletLandscape) {
-        Row(modifier = Modifier.fillMaxSize().background(colors.darkBg)) {
-            Box(modifier = Modifier.weight(0.4f).fillMaxHeight().padding(8.dp)) {
+        Row(modifier = Modifier.fillMaxSize().gridPaper(colors.darkBg, colors.rule)) {
+            Box(modifier = Modifier.weight(0.34f).fillMaxHeight().padding(8.dp)) {
                 NoteListColumn(
                     viewModel = viewModel,
                     userRole = userRole,
@@ -59,7 +71,7 @@ fun NoteListScreen(
                 )
             }
 
-            Box(modifier = Modifier.weight(0.6f).fillMaxHeight().padding(8.dp)) {
+            Box(modifier = Modifier.weight(0.66f).fillMaxHeight().padding(8.dp)) {
                 NoteDetailPane(
                     note = selectedNoteDetail,
                     userRole = userRole,
@@ -78,7 +90,7 @@ fun NoteListScreen(
             }
         }
     } else {
-        Column(modifier = Modifier.fillMaxSize().background(colors.darkBg).padding(12.dp)) {
+        Column(modifier = Modifier.fillMaxSize().gridPaper(colors.darkBg, colors.rule).padding(12.dp)) {
             NoteListColumn(
                 viewModel = viewModel,
                 userRole = userRole,
@@ -224,26 +236,29 @@ fun NoteListColumn(
                 onValueChange = { viewModel.searchQuery.value = it },
                 placeholder = { Text("搜索...", color = colors.textSecondary) },
                 modifier = Modifier.weight(1f),
-                shape = RoundedCornerShape(12.dp),
+                shape = RoundedCornerShape(14.dp),
                 singleLine = true,
                 trailingIcon = {
                     IconButton(onClick = { viewModel.fetchNotes(resetPage = true) }) {
-                        Text("🔍", color = colors.textPrimary)
+                        StationeryIcon(name = "search", size = 18.dp, tint = colors.neonBlue)
                     }
                 },
                 colors = OutlinedTextFieldDefaults.colors(
+                    focusedContainerColor = colors.cardBg,
+                    unfocusedContainerColor = colors.cardBg,
                     focusedTextColor = colors.textPrimary,
                     unfocusedTextColor = colors.textPrimary,
                     focusedBorderColor = colors.neonBlue,
-                    unfocusedBorderColor = colors.textSecondary.copy(alpha = 0.5f)
+                    unfocusedBorderColor = colors.edge
                 )
             )
             Spacer(modifier = Modifier.width(8.dp))
             OutlinedIconButton(
                 onClick = { showFilters = !showFilters },
-                shape = RoundedCornerShape(12.dp),
+                shape = RoundedCornerShape(14.dp),
+                border = androidx.compose.foundation.BorderStroke(1.5.dp, if (showFilters) colors.neonBlue else colors.edge),
                 colors = IconButtonDefaults.outlinedIconButtonColors(
-                    containerColor = if (showFilters) colors.neonBlue.copy(alpha = 0.15f) else Color.Transparent
+                    containerColor = if (showFilters) colors.neonBlue.copy(alpha = 0.14f) else colors.cardBg
                 )
             ) {
                 Icon(
@@ -271,99 +286,29 @@ fun NoteListColumn(
             }
         } else if (notes.isEmpty()) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("📂 暂无符合条件的错题笔记", color = colors.textSecondary)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    StationeryIcon(name = "folder", size = 18.dp, tint = colors.textSecondary)
+                    Text("暂无符合条件的错题笔记", color = colors.textSecondary)
+                }
             }
         } else {
+            val cardContext = LocalContext.current
             LazyVerticalGrid(
                 columns = GridCells.Fixed(1),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                contentPadding = PaddingValues(top = 6.dp, bottom = 8.dp),
                 modifier = Modifier.weight(1f)
             ) {
                 items(notes) { note ->
-                    val isSelected = note.id == selectedNoteId
-                    val containerBg = if (isSelected) colors.neonBlue.copy(alpha = 0.15f) else colors.cardBg
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { onSelectNote(note) },
-                        shape = RoundedCornerShape(12.dp),
-                        colors = CardDefaults.cardColors(
-                            containerColor = containerBg
-                        ),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-                    ) {
-                        Column(modifier = Modifier.padding(12.dp)) {
-                            Row(
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Text(
-                                    text = "${note.subject_name ?: "学科"} · ${note.semester_name ?: ""}",
-                                    fontSize = 12.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = colors.neonBlue
-                                )
-                                Text(
-                                    text = when (note.mastery_level) {
-                                        "CLUELESS" -> "🔴 完全不会"
-                                        "PARTIAL" -> "🟡 一知半解"
-                                        else -> "🟢 熟练掌握"
-                                    },
-                                    fontSize = 11.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = colors.textPrimary
-                                )
-                            }
-
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = "${if (note.source_type == "BOOK") "📖 " else "📄 "}${note.question_source_name ?: note.source_paper_name ?: "自定义来源"}",
-                                fontSize = 13.sp,
-                                fontWeight = FontWeight.SemiBold,
-                                color = colors.textPrimary
-                            )
-
-                            Text(
-                                text = note.auxiliary_text ?: "(暂无文字描述)",
-                                fontSize = 12.sp,
-                                color = colors.textSecondary,
-                                maxLines = 2,
-                                overflow = TextOverflow.Ellipsis,
-                                modifier = Modifier.padding(top = 4.dp)
-                            )
-
-                            Spacer(modifier = Modifier.height(6.dp))
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    text = note.created_at?.substringBefore('T') ?: "",
-                                    fontSize = 11.sp,
-                                    color = colors.textSecondary.copy(alpha = 0.7f)
-                                )
-                                Row(
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    val imagesCount = note.attachments.count { it.file_type?.equals("IMAGE", ignoreCase = true) == true }
-                                    val audiosCount = note.attachments.count { it.file_type?.equals("AUDIO", ignoreCase = true) == true }
-                                    val videosCount = note.attachments.count { it.file_type?.equals("VIDEO", ignoreCase = true) == true }
-
-                                    if (imagesCount > 0) {
-                                        Text("🖼️ $imagesCount", fontSize = 11.sp, color = colors.textPrimary)
-                                    }
-                                    if (audiosCount > 0) {
-                                        Text("🎵 $audiosCount", fontSize = 11.sp, color = colors.textPrimary)
-                                    }
-                                    if (videosCount > 0) {
-                                        Text("📹 $videosCount", fontSize = 11.sp, color = colors.textPrimary)
-                                    }
-                                }
-                            }
-                        }
-                    }
+                    NoteListItemCard(
+                        note = note,
+                        isSelected = note.id == selectedNoteId,
+                        cardContext = cardContext,
+                        onSelect = { onSelectNote(note) }
+                    )
                 }
             }
 
@@ -391,12 +336,12 @@ fun NoteListColumn(
                         enabled = currentPage > 1,
                         shape = RoundedCornerShape(8.dp)
                     ) {
-                        Text("上一页", fontSize = 12.sp)
+                        Text("上一页", fontSize = 13.5.sp)
                     }
 
                     Text(
                         text = "第 $currentPage / $totalPages 页 (共 $totalItems 条)",
-                        fontSize = 12.sp,
+                        fontSize = 13.5.sp,
                         color = colors.textSecondary
                     )
 
@@ -410,7 +355,7 @@ fun NoteListColumn(
                         enabled = currentPage < totalPages,
                         shape = RoundedCornerShape(8.dp)
                     ) {
-                        Text("下一页", fontSize = 12.sp)
+                        Text("下一页", fontSize = 13.5.sp)
                     }
                 }
             }

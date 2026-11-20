@@ -30,6 +30,8 @@ import kotlinx.coroutines.launch
 import com.sproutmemo.android.ui.components.StyledDropdown
 import com.sproutmemo.android.ui.components.RequiredLabel
 import com.sproutmemo.android.ui.components.SelectableOptionCard
+import com.sproutmemo.android.ui.components.StationeryIcon
+import com.sproutmemo.android.ui.components.gridPaper
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -112,7 +114,9 @@ fun SourceSettingsBottomSheet(
                 color = colors.darkBg
             ) {
                 Column(
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .gridPaper(colors.darkBg, colors.rule)
                 ) {
                     // Header Bar with Back Button and Title
                     Row(
@@ -125,7 +129,7 @@ fun SourceSettingsBottomSheet(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         IconButton(onClick = { handleDismiss() }) {
-                            Text("←", fontSize = 24.sp, color = colors.textPrimary)
+                            StationeryIcon(name = "chevron-left", size = 22.dp, tint = colors.textPrimary)
                         }
                         Text(
                             text = "关联习题来源",
@@ -135,6 +139,7 @@ fun SourceSettingsBottomSheet(
                             modifier = Modifier.padding(start = 8.dp)
                         )
                     }
+                    HorizontalDivider(color = colors.rule, thickness = 1.5.dp)
 
                     // Content List
                     Column(
@@ -203,7 +208,7 @@ fun SourceSettingsBottomSheet(
                         ) {
                             SelectableOptionCard(
                                 label = "习题册",
-                                iconText = "📖",
+                                iconText = "book",
                                 isSelected = sourceType == "BOOK",
                                 onClick = { viewModel.sourceType.value = "BOOK" },
                                 colors = colors,
@@ -211,7 +216,7 @@ fun SourceSettingsBottomSheet(
                             )
                             SelectableOptionCard(
                                 label = "试卷/其它",
-                                iconText = "📄",
+                                iconText = "file",
                                 isSelected = sourceType == "PAPER",
                                 onClick = { viewModel.sourceType.value = "PAPER" },
                                 colors = colors,
@@ -236,9 +241,9 @@ fun SourceSettingsBottomSheet(
                             if (books.isEmpty()) {
                                 Spacer(modifier = Modifier.height(4.dp))
                                 Text(
-                                    text = "⚠️ 当前学科下暂无已创建的习题册。录题只能选择已有习题册，请先前往「我的习题册」录入书架。",
+                                    text = "当前学科下暂无已创建的习题册。录题只能选择已有习题册，请先前往「我的习题册」录入书架。",
                                     color = colors.neonAmber,
-                                    fontSize = 11.sp,
+                                    fontSize = 13.sp,
                                     fontWeight = FontWeight.SemiBold
                                 )
                             }
